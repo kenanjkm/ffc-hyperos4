@@ -12,7 +12,7 @@
     <string name="apps_load_failed">无法读取应用列表</string>
     <string name="home_apps_allowed">%1$d / %2$d 个应用已允许</string>
     <string name="home_google_protection_title">Google 联网保护</string>
-    <string name="home_google_protection_summary">%1$d / 2 项已启用</string>
+    <string name="home_google_protection_summary">%1$d / %2$d 项已启用</string>
     <string name="home_diagnostics">Google Play 服务诊断</string>
     <string name="home_about">关于 fcmfix</string>
     <string name="version_format">版本 %1$s</string>
@@ -60,8 +60,8 @@
     <string name="auto_allow_summary">新安装的FCM应用默认开启</string>
     <string name="keep_notif_title">保留应用停止前的通知</string>
     <string name="keep_notif_summary">应用停止时保留它已有的通知</string>
-    <string name="icebox_title">允许唤醒冻结的应用</string>
-    <string name="icebox_summary">FCM 到达时尝试解除冻结状态</string>
+    <string name="icebox_title">唤醒被冰箱停用的应用</string>
+    <string name="icebox_summary">FCM 到达时尝试通过冰箱启用被停用的应用（需要冰箱）；与 HyperOS 冻结无关</string>
     <string name="other_group">其他设置</string>
     <string name="hide_icon_setting_title">隐藏桌面图标</string>
     <string name="hide_icon_setting_summary">隐藏启动器中的 fcmfix 图标，不影响模块运行</string>
@@ -73,4 +73,6 @@
     <string name="toast_save_failed">设置保存失败，请重试</string>
     <string name="toast_diag_failed">无法打开 Google Play 服务诊断页面</string>
     <string name="toast_no_browser">没有可用的浏览器</string>
+    <string name="doze_title_hyperos">保持 GMS 唤醒</string>
+    <string name="doze_summary_hyperos">阻止 HyperOS（Greeze）在息屏时冻结 GMS 或限制其联网，FCM 推送需要此项</string>
 </resources>

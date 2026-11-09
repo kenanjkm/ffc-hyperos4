@@ -11,7 +11,7 @@
     <string name="apps_load_failed">Cannot read the app list</string>
     <string name="home_apps_allowed">%1$d / %2$d apps allowed</string>
     <string name="home_google_protection_title">Google network protection</string>
-    <string name="home_google_protection_summary">%1$d / 2 enabled</string>
+    <string name="home_google_protection_summary">%1$d / %2$d enabled</string>
     <string name="home_diagnostics">Google Play services diagnostics</string>
     <string name="home_about">About fcmfix</string>
     <string name="version_format">Version %1$s</string>
@@ -59,8 +59,8 @@
     <string name="auto_allow_summary">Newly installed FCM apps are enabled by default</string>
     <string name="keep_notif_title">Keep notifications when an app stops</string>
     <string name="keep_notif_summary">Keeps an app\'s existing notifications when it is stopped</string>
-    <string name="icebox_title">Allow waking frozen apps</string>
-    <string name="icebox_summary">Tries to unfreeze the app when FCM arrives</string>
+    <string name="icebox_title">Wake apps disabled by Ice Box</string>
+    <string name="icebox_summary">When FCM arrives, tries to enable an app that Ice Box disabled (needs Ice Box); unrelated to the HyperOS freezer</string>
     <string name="other_group">Other settings</string>
     <string name="hide_icon_setting_title">Hide launcher icon</string>
     <string name="hide_icon_setting_summary">Hides the fcmfix launcher icon; the module keeps working</string>
@@ -72,4 +72,6 @@
     <string name="toast_save_failed">Saving settings failed, please try again</string>
     <string name="toast_diag_failed">Cannot open the Google Play services diagnostics page</string>
     <string name="toast_no_browser">No browser available</string>
+    <string name="doze_title_hyperos">Keep GMS awake</string>
+    <string name="doze_summary_hyperos">Stops HyperOS (Greeze) from freezing GMS or limiting its network while the screen is off; needed for FCM push</string>
 </resources>
