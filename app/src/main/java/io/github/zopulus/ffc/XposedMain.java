@@ -31,6 +31,7 @@ public class XposedMain extends io.github.libxposed.api.XposedModule {
         safeInit(() -> new OplusProxyFix(classLoader), "OplusProxyFix");
         safeInit(() -> new OplusGoogleNetworkFix(classLoader), "OplusGoogleNetworkFix");
         safeInit(() -> new OplusDeviceIdleFix(classLoader), "OplusDeviceIdleFix");
+        safeInit(() -> new io.github.zopulus.ffc.xposed.HyperOsFix(classLoader), "HyperOsFix");
         // system_server 中 attachBaseContext 的 hook 安装过晚，主动获取系统上下文
         initSystemServerContext(classLoader);
     }

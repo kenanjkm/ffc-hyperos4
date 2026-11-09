@@ -204,7 +204,7 @@ class MainActivity : ComponentActivity() {
             )
             launcherIconHidden.value = hidden
         } catch (error: Throwable) {
-            Toast.makeText(this, "无法更改桌面图标状态", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_icon_failed), Toast.LENGTH_SHORT).show()
             Log.e(TAG, "Could not change launcher icon visibility", error)
         }
     }
@@ -243,7 +243,7 @@ class MainActivity : ComponentActivity() {
             } catch (error: Exception) {
                 Log.e(TAG, "Could not initialize default configuration", error)
                 runOnUiThread {
-                    Toast.makeText(this, "默认设置保存失败，请重新打开页面重试", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.toast_default_save_failed), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -357,7 +357,7 @@ class MainActivity : ComponentActivity() {
             result?.localFailure?.let { Log.w(TAG, "Local configuration save failed", it) }
             if (result == null || !result.localSaved && !result.remoteSaved) {
                 runOnUiThread {
-                    Toast.makeText(this, "设置保存失败，请重试", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.toast_save_failed), Toast.LENGTH_SHORT).show()
                     if (generation == editGeneration) {
                         uiState.value = uiState.value.copy(config = previous)
                         loadConfigFromAvailableSource()
@@ -473,16 +473,16 @@ class MainActivity : ComponentActivity() {
         try {
             startActivity(intent)
         } catch (error: Throwable) {
-            Toast.makeText(this, "无法打开 Google Play 服务诊断页面", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_diag_failed), Toast.LENGTH_SHORT).show()
             Log.w(TAG, "GMS diagnostics activity unavailable", error)
         }
     }
 
     private fun openProjectPage() {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/zopulus/fcmfix-coloros17")))
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kenanjkm/ffc-hyperos4")))
         } catch (error: Throwable) {
-            Toast.makeText(this, "没有可用的浏览器", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_no_browser), Toast.LENGTH_SHORT).show()
         }
     }
 }

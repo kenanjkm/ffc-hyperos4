@@ -211,6 +211,8 @@ public class BroadcastFix extends XposedModule {
                         // Activation may wait; refresh attribution after that wait.
                         if (activationAttempted) OplusProxyFix.unfreeze(target);
                         else OplusProxyFix.unfreeze(target, targetUid);
+                        // HyperOS: thaw the target in Greeze (no-op on ColorOS).
+                        HyperOsFix.thaw(targetUid);
                     }
                     intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                     // Framework AppOps arguments are deliberately left untouched.

@@ -1,5 +1,16 @@
 # 更新记录
 
+## 2026110901-hyperos4（95）
+
+- HyperOS 4 desteği (HyperOS 4 / Android 17 services.jar ve miui-services.jar üzerinde doğrulandı):
+  - MIUI otomatik başlatma: `BroadcastQueueModernStubImpl` (`checkApplicationAutoStart`, `checkReceiverAppDealBroadcast`, `checkReceiverIfRestricted`) yalnızca GMS'den gelen ve doğrulanan FCM için atlanır
+  - `AutoStartManagerServiceStubImpl.isAllowStartService` yalnızca 20 sn'lik FCM teslim penceresinde izin verir
+  - Greeze dondurucu: `isRestrictReceiver`, `isRestrictBackgroundAction`, `freezeAction`, `freezeUids`; hedef uygulama `thawUidAsync` ile çözülür
+  - "GMS'yi uyanık tut" (Doze beyaz listesi ayarı) HyperOS'ta Greeze'nin GMS ağ kısıtlamasını ve hızlı dondurmasını da engeller
+  - MIUI yerel bildirim engeli (`isDeniedLocalNotification`) izinli uygulamalar için kaldırılır
+- Arayüz: metinler kaynak dosyalarına taşındı; Türkçe ve İngilizce eklendi
+- Derin uyku: wakelock, alarm veya zamanlanmış iş eklenmedi
+
 ## 2026110501（94）
 
 - 修复关闭界面后，Xposed 服务监听仍持有页面对象的问题

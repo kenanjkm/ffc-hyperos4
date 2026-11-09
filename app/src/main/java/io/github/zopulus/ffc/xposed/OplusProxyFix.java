@@ -540,7 +540,8 @@ public class OplusProxyFix extends XposedModule {
         return isDeliveryTargetAllowed(sFcmDeliveryWindows.packageName(uid, SystemClock.elapsedRealtime()));
     }
 
-    private static String getFcmDeliveryPackage(int uid) {
+    /** Package that owns the active FCM delivery window of this UID, or null. Also used by HyperOsFix. */
+    static String getFcmDeliveryPackage(int uid) {
         return sFcmDeliveryWindows.packageName(uid, SystemClock.elapsedRealtime());
     }
 
