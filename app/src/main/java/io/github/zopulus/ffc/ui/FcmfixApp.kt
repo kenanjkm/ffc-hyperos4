@@ -97,6 +97,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import io.github.zopulus.ffc.R
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -107,10 +109,10 @@ import io.github.zopulus.ffc.FcmfixConfig
 import io.github.zopulus.ffc.FcmfixUiState
 import io.github.zopulus.ffc.InstalledApp
 
-private enum class MainTab(val label: String, val appBarTitle: String = label) {
-    HOME("主页", "Fcmfix"),
-    APPS("应用"),
-    SETTINGS("设置")
+private enum class MainTab(@StringRes val label: Int, @StringRes val appBarTitle: Int = label) {
+    HOME(R.string.tab_home, R.string.app_bar_home),
+    APPS(R.string.tab_apps),
+    SETTINGS(R.string.tab_settings)
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -170,10 +172,10 @@ fun FcmfixApp(
                         icon = {
                             Icon(
                                 if (selectedTab == tab) selectedIcon else unselectedIcon,
-                                contentDescription = tab.label
+                                contentDescription = stringResource(tab.label)
                             )
                         },
-                        label = { Text(tab.label) }
+                        label = { Text(stringResource(tab.label)) }
                     )
                 }
             }
@@ -200,7 +202,7 @@ fun FcmfixApp(
                             ) {
                                 Text("Fcmfix", modifier = Modifier.alignByBaseline(), style = titleStyle)
                                 Text(
-                                    "for ColorOS17",
+                                    stringResource(R.string.app_subtitle),
                                     modifier = Modifier.alignByBaseline(),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -209,7 +211,7 @@ fun FcmfixApp(
                             }
                         } else {
                             Text(
-                                MainTab.entries[page].appBarTitle,
+                                stringResource(MainTab.entries[page].appBarTitle),
                                 modifier = Modifier.padding(start = 4.dp),
                                 style = titleStyle
                             )
@@ -219,7 +221,7 @@ fun FcmfixApp(
                         { expanded ->
                             if (!expanded) {
                                 Text(
-                                    "for ColorOS17",
+                                    stringResource(R.string.app_subtitle),
                                     modifier = Modifier.padding(start = 4.dp),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -309,18 +311,18 @@ private fun HomeScreen(
             items = listOf(
                 HomeInfoItem(
                     icon = ImageVector.vectorResource(R.drawable.ic_notifications),
-                    title = "FCM 应用唤醒",
-                    summary = if (state.appsLoading && apps.isEmpty()) "正在读取应用列表" else if (state.appsLoadFailed && apps.isEmpty()) {
-                        "无法读取应用列表"
+                    title = stringResource(R.string.home_fcm_wake_title),
+                    summary = if (state.appsLoading && apps.isEmpty()) stringResource(R.string.apps_loading) else if (state.appsLoadFailed && apps.isEmpty()) {
+                        stringResource(R.string.apps_load_failed)
                     } else {
-                        "$allowedFcmCount / ${apps.size} 个应用已允许"
+                        stringResource(R.string.home_apps_allowed, allowedFcmCount, apps.size)
                     },
                     onClick = onOpenApps
                 ),
                 HomeInfoItem(
                     icon = ImageVector.vectorResource(R.drawable.ic_shield),
-                    title = "Google 联网保护",
-                    summary = "$enabledGoogleProtections / 2 项已启用",
+                    title = stringResource(R.string.home_google_protection_title),
+                    summary = stringResource(R.string.home_google_protection_summary, enabledGoogleProtections),
                     onClick = onOpenSettings
                 )
             )
@@ -329,12 +331,12 @@ private fun HomeScreen(
             items = listOf(
                 HomeInfoItem(
                     icon = ImageVector.vectorResource(R.drawable.ic_troubleshoot),
-                    title = "Google Play 服务诊断",
+                    title = stringResource(R.string.home_diagnostics),
                     onClick = onOpenDiagnostics
                 ),
                 HomeInfoItem(
                     icon = Icons.Outlined.Info,
-                    title = "关于 fcmfix",
+                    title = stringResource(R.string.home_about),
                     onClick = onOpenProject
                 )
             )
@@ -384,7 +386,7 @@ private fun HomeStatusCard(connected: Boolean, versionName: String) {
                 }
             },
             supportingContent = {
-                Text("版本 $versionName", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.version_format, versionName), style = MaterialTheme.typography.bodyMedium)
             },
             verticalAlignment = Alignment.CenterVertically,
             colors = ListItemDefaults.colors(
@@ -397,7 +399,7 @@ private fun HomeStatusCard(connected: Boolean, versionName: String) {
             elevation = ListItemDefaults.elevation(),
             content = {
                 Text(
-                    if (connected) "已激活" else "未激活",
+                    if (connected) stringResource(R.string.status_active) else stringResource(R.string.status_inactive),
                     style = MaterialTheme.typography.titleMediumEmphasized
                 )
             }
@@ -407,20 +409,24 @@ private fun HomeStatusCard(connected: Boolean, versionName: String) {
 
 @Composable
 private fun SystemInfoCard() {
-    val systemInfo = remember {
+    val unknownText = stringResource(R.string.unknown)
+    val osLabel = stringResource(R.string.sysinfo_os)
+    val deviceLabel = stringResource(R.string.sysinfo_device)
+    val archLabel = stringResource(R.string.sysinfo_arch)
+    val systemInfo = remember(unknownText, osLabel, deviceLabel, archLabel) {
         val manufacturer = Build.MANUFACTURER.orEmpty().trim()
         val model = Build.MODEL.orEmpty().trim()
         val device = if (model.startsWith(manufacturer, ignoreCase = true)) model
             else listOf(manufacturer, model).filter(String::isNotBlank).joinToString(" ")
-        val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: "未知"
+        val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: unknownText
         val pageSize = runCatching { Os.sysconf(OsConstants._SC_PAGESIZE) }.getOrNull()
         val architecture = if (pageSize != null && pageSize > 0) {
             "$abi (${pageSize / 1024}K)"
         } else abi
         listOf(
-            "系统版本" to "${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",
-            "设备" to device.ifBlank { "未知" },
-            "系统架构" to architecture
+            osLabel to "${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",
+            deviceLabel to device.ifBlank { unknownText },
+            archLabel to architecture
         )
     }
     Surface(
@@ -509,7 +515,7 @@ private fun AppListActions(
             haptics.performHapticFeedback(HapticFeedbackType.VirtualKey)
             expanded = true
         }) {
-            Icon(ImageVector.vectorResource(R.drawable.ic_more_vert), contentDescription = "应用筛选与全选")
+            Icon(ImageVector.vectorResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.apps_menu_desc))
         }
         DropdownMenuPopup(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuGroup(
@@ -520,7 +526,7 @@ private fun AppListActions(
                     SelectableDropdownMenuItem(
                         selected = selectedFilter == filter,
                         shapes = MenuDefaults.itemShape(index, AppFilter.entries.size),
-                        text = { Text(filter.title) },
+                        text = { Text(stringResource(filter.title)) },
                         selectedLeadingIcon = { Icon(Icons.Filled.Check, contentDescription = null) },
                         onClick = {
                             haptics.performHapticFeedback(HapticFeedbackType.VirtualKey)
@@ -538,7 +544,7 @@ private fun AppListActions(
                 SelectableDropdownMenuItem(
                     shapes = MenuDefaults.itemShape(index = 0, count = 1),
                     selected = apps.isNotEmpty() && apps.all { it.packageName in state.config.allowedPackages },
-                    text = { Text("全选") },
+                    text = { Text(stringResource(R.string.select_all)) },
                     enabled = !state.appsLoading && !state.appsLoadFailed && apps.isNotEmpty(),
                     selectedLeadingIcon = {
                         Icon(Icons.Filled.Check, contentDescription = null,
@@ -596,12 +602,12 @@ private fun AppsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
-                placeholder = { Text("搜索应用名称或包名") },
+                placeholder = { Text(stringResource(R.string.search_hint)) },
                 shape = MaterialTheme.shapes.extraLarge
             )
 
             Text(
-                "$allowedFcmCount / ${apps.size} 个已开启" + if (state.appsLoading) " · 刷新中" else "",
+                stringResource(R.string.apps_enabled_count, allowedFcmCount, apps.size) + if (state.appsLoading) stringResource(R.string.apps_refreshing_suffix) else "",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -609,7 +615,7 @@ private fun AppsScreen(
         }
 
         if (state.appsLoadFailed && apps.isNotEmpty()) {
-            TextButton(onClick = onReloadApps) { Text("刷新失败，点击重试") }
+            TextButton(onClick = onReloadApps) { Text(stringResource(R.string.refresh_failed_retry)) }
         }
 
         when {
@@ -617,22 +623,22 @@ private fun AppsScreen(
                 CircularProgressIndicator()
             }
             state.appsLoadFailed && apps.isEmpty() -> EmptyAppsState(
-                title = "无法读取 FCM 应用",
-                message = "请检查应用列表权限后重试。",
+                title = stringResource(R.string.fcm_apps_load_failed_title),
+                message = stringResource(R.string.fcm_apps_load_failed_msg),
                 onReload = onReloadApps
             )
             visibleApps.isEmpty() -> EmptyAppsState(
                 title = when {
-                    query.isNotBlank() -> "没有搜索结果"
-                    selectedFilter == AppFilter.ALLOWED -> "暂无已开启的 FCM 应用"
-                    selectedFilter == AppFilter.DISABLED -> "暂无已关闭的 FCM 应用"
-                    else -> "未检测到 FCM 应用"
+                    query.isNotBlank() -> stringResource(R.string.empty_search_title)
+                    selectedFilter == AppFilter.ALLOWED -> stringResource(R.string.empty_allowed_title)
+                    selectedFilter == AppFilter.DISABLED -> stringResource(R.string.empty_disabled_title)
+                    else -> stringResource(R.string.empty_all_title)
                 },
                 message = when {
-                    query.isNotBlank() -> "检查应用名称或包名是否正确。"
-                    selectedFilter == AppFilter.ALLOWED -> "在列表中开启应用开关以允许 FCM 唤醒。"
-                    selectedFilter == AppFilter.DISABLED -> "当前 FCM 应用均已开启。"
-                    else -> "列表只显示包含 Firebase Cloud Messaging 接收器的应用。"
+                    query.isNotBlank() -> stringResource(R.string.empty_search_msg)
+                    selectedFilter == AppFilter.ALLOWED -> stringResource(R.string.empty_allowed_msg)
+                    selectedFilter == AppFilter.DISABLED -> stringResource(R.string.empty_disabled_msg)
+                    else -> stringResource(R.string.empty_all_msg)
                 },
                 onReload = onReloadApps,
                 showButton = query.isBlank() && selectedFilter == AppFilter.ALL
@@ -675,7 +681,7 @@ private fun EmptyAppsState(
         Text(title, style = MaterialTheme.typography.titleMedium)
         Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (showButton) {
-            TextButton(onClick = onReload) { Text("刷新列表") }
+            TextButton(onClick = onReload) { Text(stringResource(R.string.reload_list)) }
         }
     }
 }
@@ -702,7 +708,7 @@ private fun AppRow(
         leadingContent = {
             Image(
                 bitmap = app.icon.asImageBitmap(),
-                contentDescription = "${app.label} 图标",
+                contentDescription = stringResource(R.string.app_icon_desc, app.label),
                 modifier = Modifier.size(46.dp).clip(RoundedCornerShape(14.dp))
             )
         },
@@ -745,18 +751,18 @@ private fun SettingsScreen(
         AlertDialog(
             onDismissRequest = { showRootWarning = false },
             icon = { Icon(Icons.Outlined.Warning, contentDescription = null) },
-            title = { Text("开启 Root 联网白名单？") },
+            title = { Text(stringResource(R.string.root_warning_title)) },
             text = {
-                Text("UID 0 可能包含所有以 Root 身份运行的进程。开启后，这些进程都会进入 ColorOS 睡眠待机优化白名单。")
+                Text(stringResource(R.string.root_warning_text))
             },
             confirmButton = {
                 TextButton(onClick = {
                     showRootWarning = false
                     if (config.deepSleepGoogleWhitelist) onConfigChange(config.copy(rootDeepSleepNetworkWhitelist = true))
-                }) { Text("开启") }
+                }) { Text(stringResource(R.string.enable)) }
             },
             dismissButton = {
-                TextButton(onClick = { showRootWarning = false }) { Text("取消") }
+                TextButton(onClick = { showRootWarning = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -764,20 +770,20 @@ private fun SettingsScreen(
     if (showHideLauncherIconWarning) {
         AlertDialog(
             onDismissRequest = { showHideLauncherIconWarning = false },
-            title = { Text("隐藏桌面图标？") },
+            title = { Text(stringResource(R.string.hide_icon_title)) },
             text = {
                 Text(
-                    "隐藏后，可从 LSPosed 模块页面打开 fcmfix，在设置中关闭此选项即可恢复桌面图标"
+                    stringResource(R.string.hide_icon_text)
                 )
             },
             confirmButton = {
                 TextButton(onClick = {
                     showHideLauncherIconWarning = false
                     onLauncherIconHiddenChange(true)
-                }) { Text("隐藏") }
+                }) { Text(stringResource(R.string.hide)) }
             },
             dismissButton = {
-                TextButton(onClick = { showHideLauncherIconWarning = false }) { Text("取消") }
+                TextButton(onClick = { showHideLauncherIconWarning = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -789,12 +795,12 @@ private fun SettingsScreen(
     ) {
         item {
             SettingsGroup(
-                title = "ColorOS 联网保护",
+                title = stringResource(R.string.settings_network_group),
                 items = listOf(
                     SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_bedtime),
-                        title = "睡眠待机优化白名单",
-                        summary = "将 GMS 和 GSF 加入联网白名单",
+                        title = stringResource(R.string.deep_sleep_title),
+                        summary = stringResource(R.string.deep_sleep_summary),
                         checked = config.deepSleepGoogleWhitelist,
                         onCheckedChange = { enabled ->
                             onConfigChange(config.copy(
@@ -805,8 +811,8 @@ private fun SettingsScreen(
                     ),
                     SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_terminal),
-                        title = "待机优化白名单 UID 0",
-                        summary = if (config.deepSleepGoogleWhitelist) "将 Root 下所有进程加入联网白名单" else "请先开启睡眠待机优化白名单",
+                        title = stringResource(R.string.uid0_title),
+                        summary = if (config.deepSleepGoogleWhitelist) stringResource(R.string.uid0_summary_on) else stringResource(R.string.uid0_summary_off),
                         checked = config.deepSleepGoogleWhitelist && config.rootDeepSleepNetworkWhitelist,
                         enabled = config.deepSleepGoogleWhitelist,
                         onCheckedChange = { enabled ->
@@ -816,8 +822,8 @@ private fun SettingsScreen(
                     ),
                     SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_hourglass),
-                        title = "Doze 待机优化白名单",
-                        summary = "将 GMS 和 GSF 加入待机优化白名单",
+                        title = stringResource(R.string.doze_title),
+                        summary = stringResource(R.string.doze_summary),
                         checked = config.dozeGoogleWhitelist,
                         onCheckedChange = { enabled ->
                             onConfigChange(config.copy(dozeGoogleWhitelist = enabled))
@@ -829,26 +835,26 @@ private fun SettingsScreen(
 
         item {
             SettingsGroup(
-                title = "应用唤醒与通知",
+                title = stringResource(R.string.wake_group),
                 items = listOf(
                     SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_shield),
-                        title = "自动放行新应用",
-                        summary = "新安装的FCM应用默认开启",
+                        title = stringResource(R.string.auto_allow_title),
+                        summary = stringResource(R.string.auto_allow_summary),
                         checked = config.autoAllowNewApps,
                         onCheckedChange = { onConfigChange(config.copy(autoAllowNewApps = it)) }
                     ),
                     SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_notifications_active),
-                        title = "保留应用停止前的通知",
-                        summary = "应用停止时保留它已有的通知",
+                        title = stringResource(R.string.keep_notif_title),
+                        summary = stringResource(R.string.keep_notif_summary),
                         checked = config.disableAutoCleanNotification,
                         onCheckedChange = { onConfigChange(config.copy(disableAutoCleanNotification = it)) }
                     ),
                     SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_ac_unit),
-                        title = "允许唤醒冻结的应用",
-                        summary = "FCM 到达时尝试解除冻结状态",
+                        title = stringResource(R.string.icebox_title),
+                        summary = stringResource(R.string.icebox_summary),
                         checked = config.includeIceBoxDisabledApps,
                         onCheckedChange = { onConfigChange(config.copy(includeIceBoxDisabledApps = it)) }
                     )
@@ -858,12 +864,12 @@ private fun SettingsScreen(
 
         item {
             SettingsGroup(
-                title = "其他设置",
+                title = stringResource(R.string.other_group),
                 items = listOf(
                     SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_visibility_off),
-                        title = "隐藏桌面图标",
-                        summary = "隐藏启动器中的 fcmfix 图标，不影响模块运行",
+                        title = stringResource(R.string.hide_icon_setting_title),
+                        summary = stringResource(R.string.hide_icon_setting_summary),
                         checked = launcherIconHidden,
                         onCheckedChange = { hidden ->
                             if (hidden) showHideLauncherIconWarning = true

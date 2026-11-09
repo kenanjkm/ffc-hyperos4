@@ -1,9 +1,9 @@
 package io.github.zopulus.ffc.ui
 
-internal enum class AppFilter(val title: String) {
-    ALL("全部"),
-    ALLOWED("已开启"),
-    DISABLED("已关闭")
+internal enum class AppFilter(@androidx.annotation.StringRes val title: Int) {
+    ALL(io.github.zopulus.ffc.R.string.filter_all),
+    ALLOWED(io.github.zopulus.ffc.R.string.filter_allowed),
+    DISABLED(io.github.zopulus.ffc.R.string.filter_disabled)
 }
 
 /** Freeze grouping for a visit, and filter membership until the next selection. */
