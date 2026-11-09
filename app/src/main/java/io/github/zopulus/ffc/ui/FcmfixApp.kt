@@ -294,10 +294,11 @@ private fun HomeScreen(
 ) {
     val config = state.config
     val allowedFcmCount = apps.count { it.packageName in config.allowedPackages }
-    val enabledGoogleProtections = listOf(
-        config.deepSleepGoogleWhitelist,
-        config.dozeGoogleWhitelist
-    ).count { it }
+    val hyperOs = remember { isHyperOs() }
+    // On HyperOS only the GMS keep-awake option has an effect; the ColorOS sleep whitelist does not.
+    val googleProtections = if (hyperOs) listOf(config.dozeGoogleWhitelist)
+        else listOf(config.deepSleepGoogleWhitelist, config.dozeGoogleWhitelist)
+    val enabledGoogleProtections = googleProtections.count { it }
 
     Column(
         modifier = modifier
@@ -322,7 +323,7 @@ private fun HomeScreen(
                 HomeInfoItem(
                     icon = ImageVector.vectorResource(R.drawable.ic_shield),
                     title = stringResource(R.string.home_google_protection_title),
-                    summary = stringResource(R.string.home_google_protection_summary, enabledGoogleProtections),
+                    summary = stringResource(R.string.home_google_protection_summary, enabledGoogleProtections, googleProtections.size),
                     onClick = onOpenSettings
                 )
             )
@@ -743,6 +744,7 @@ private fun SettingsScreen(
     onConfigChange: (FcmfixConfig) -> Unit,
     onLauncherIconHiddenChange: (Boolean) -> Unit
 ) {
+    val hyperOs = remember { isHyperOs() }
     val config = state.config
     var showRootWarning by rememberSaveable { mutableStateOf(false) }
     var showHideLauncherIconWarning by rememberSaveable { mutableStateOf(false) }
@@ -796,8 +798,9 @@ private fun SettingsScreen(
         item {
             SettingsGroup(
                 title = stringResource(R.string.settings_network_group),
-                items = listOf(
-                    SettingEntry(
+                // The two ColorOS-only network whitelists do nothing on HyperOS, so they are hidden there.
+                items = listOfNotNull(
+                    if (hyperOs) null else SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_bedtime),
                         title = stringResource(R.string.deep_sleep_title),
                         summary = stringResource(R.string.deep_sleep_summary),
@@ -809,7 +812,7 @@ private fun SettingsScreen(
                             ))
                         }
                     ),
-                    SettingEntry(
+                    if (hyperOs) null else SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_terminal),
                         title = stringResource(R.string.uid0_title),
                         summary = if (config.deepSleepGoogleWhitelist) stringResource(R.string.uid0_summary_on) else stringResource(R.string.uid0_summary_off),
@@ -822,8 +825,8 @@ private fun SettingsScreen(
                     ),
                     SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_hourglass),
-                        title = stringResource(R.string.doze_title),
-                        summary = stringResource(R.string.doze_summary),
+                        title = stringResource(if (hyperOs) R.string.doze_title_hyperos else R.string.doze_title),
+                        summary = stringResource(if (hyperOs) R.string.doze_summary_hyperos else R.string.doze_summary),
                         checked = config.dozeGoogleWhitelist,
                         onCheckedChange = { enabled ->
                             onConfigChange(config.copy(dozeGoogleWhitelist = enabled))
@@ -954,4 +957,13 @@ private fun SettingRow(item: SettingEntry, index: Int, count: Int, modifier: Mod
         },
         content = { Text(item.title, color = if (item.enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)) }
     )
+}
+
+/** HyperOS (Xiaomi) build: ColorOS-only options are hidden and labels describe the HyperOS behaviour. */
+internal fun isHyperOs(): Boolean {
+    val miOs = runCatching {
+        val get = Class.forName("android.os.SystemProperties").getMethod("get", String::class.java)
+        (get.invoke(null, "ro.mi.os.version.name") as? String).orEmpty()
+    }.getOrDefault("")
+    return miOs.isNotBlank() || Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true)
 }

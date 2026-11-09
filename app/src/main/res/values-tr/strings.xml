@@ -11,7 +11,7 @@
     <string name="apps_load_failed">Uygulama listesi okunamadı</string>
     <string name="home_apps_allowed">%1$d / %2$d uygulamaya izin verildi</string>
     <string name="home_google_protection_title">Google ağ koruması</string>
-    <string name="home_google_protection_summary">%1$d / 2 etkin</string>
+    <string name="home_google_protection_summary">%1$d / %2$d etkin</string>
     <string name="home_diagnostics">Google Play Hizmetleri tanılama</string>
     <string name="home_about">fcmfix hakkında</string>
     <string name="version_format">Sürüm %1$s</string>
@@ -59,8 +59,8 @@
     <string name="auto_allow_summary">Yeni kurulan FCM uygulamaları varsayılan olarak açılır</string>
     <string name="keep_notif_title">Uygulama durunca bildirimleri koru</string>
     <string name="keep_notif_summary">Uygulama durdurulduğunda mevcut bildirimleri silinmez</string>
-    <string name="icebox_title">Dondurulmuş uygulamaları uyandır</string>
-    <string name="icebox_summary">FCM geldiğinde uygulamanın dondurmasını kaldırmayı dener</string>
+    <string name="icebox_title">Ice Box\'ın devre dışı bıraktığı uygulamaları uyandır</string>
+    <string name="icebox_summary">FCM geldiğinde Ice Box\'ın devre dışı bıraktığı uygulamayı etkinleştirmeyi dener (Ice Box gerekir); HyperOS dondurucusuyla ilgisi yoktur</string>
     <string name="other_group">Diğer ayarlar</string>
     <string name="hide_icon_setting_title">Başlatıcı simgesini gizle</string>
     <string name="hide_icon_setting_summary">fcmfix başlatıcı simgesini gizler; modül çalışmaya devam eder</string>
@@ -72,4 +72,6 @@
     <string name="toast_save_failed">Ayarlar kaydedilemedi, lütfen tekrar deneyin</string>
     <string name="toast_diag_failed">Google Play Hizmetleri tanılama sayfası açılamadı</string>
     <string name="toast_no_browser">Kullanılabilir tarayıcı yok</string>
+    <string name="doze_title_hyperos">GMS\'yi uyanık tut</string>
+    <string name="doze_summary_hyperos">Ekran kapalıyken HyperOS\'un (Greeze) GMS\'yi dondurmasını ve ağını kısıtlamasını engeller; FCM bildirimleri için gereklidir</string>
 </resources>
