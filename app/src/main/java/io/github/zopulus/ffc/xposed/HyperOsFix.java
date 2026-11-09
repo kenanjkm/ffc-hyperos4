@@ -251,7 +251,8 @@ public class HyperOsFix extends XposedModule {
         if (uid < 10000 || greeze == null) return;
         try {
             Object service = XposedHelpers.callStaticMethod(greeze, "getService");
-            if (service != null) XposedHelpers.callMethod(service, "thawUidAsync", uid, 1000, "fcmfix");
+            // Use a reason Greeze knows ("broadcast"); unknown reasons log a warning on every thaw.
+            if (service != null) XposedHelpers.callMethod(service, "thawUidAsync", uid, 1000, "broadcast");
         } catch (Throwable error) {
             logOnce("HyperOS Greeze thaw failed: " + error);
         }
