@@ -82,4 +82,11 @@
     <string name="hook_status_not_applicable">%1$d grup yalnızca %2$s\'te var, bu cihaza uygulanmaz:</string>
     <string name="hook_alert_title">fcmfix: %1$d hook kurulamadı</string>
     <string name="hook_alert_text">Kurulamayan: %1$s. Sistem güncellemesinden sonra modülün güncellenmesi gerekebilir; bazı bildirimler gecikebilir.</string>
+    <string name="protected_group">Kritik uygulama koruması</string>
+    <string name="protected_title">Kritik uygulama koruması (HyperOS)</string>
+    <string name="protected_summary_none">Seçili uygulama yok. Seçilen uygulamalar arka planda dondurulmaz ve kapatılmaz; pil tüketimi artar</string>
+    <string name="protected_summary_some">%1$d uygulama korunuyor (pil tüketimi artar)</string>
+    <string name="protected_warning">Seçilen uygulamalar HyperOS tarafından dondurulmaz (Greeze) ve bellek yöneticisi tarafından arka planda kapatılmaz. Kendi bildirim kanalını kullanan uygulamalar (ör. Instagram) içindir. Bu uygulamalar arka planda çalışmaya devam eder ve daha fazla pil harcar; yalnızca gerçekten gerekenleri seçin.</string>
+    <string name="protected_empty">Önce Uygulamalar sekmesinde FCM ile uyandırmaya izin verin.</string>
+    <string name="ok">Tamam</string>
 </resources>

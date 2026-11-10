@@ -59,7 +59,8 @@ data class FcmfixConfig(
     val dozeGoogleWhitelist: Boolean = defaultValue(KEY_DOZE_GOOGLE_WHITELIST),
     val rootDeepSleepNetworkWhitelist: Boolean = false,
     val autoAllowNewApps: Boolean = defaultValue(KEY_AUTO_ALLOW_NEW_APPS),
-    val installEvents: Set<String> = emptySet()
+    val installEvents: Set<String> = emptySet(),
+    val protectedApps: Set<String> = emptySet()
 )
 
 data class InstalledApp(
@@ -363,7 +364,8 @@ class MainActivity : ComponentActivity() {
         dozeGoogleWhitelist = snapshot.options.getValue(KEY_DOZE_GOOGLE_WHITELIST),
         rootDeepSleepNetworkWhitelist = snapshot.options.getValue(KEY_ROOT_DEEP_SLEEP_NETWORK_WHITELIST),
         autoAllowNewApps = snapshot.options.getValue(KEY_AUTO_ALLOW_NEW_APPS),
-        installEvents = snapshot.installEvents.toSet()
+        installEvents = snapshot.installEvents.toSet(),
+        protectedApps = snapshot.protectedApps.toSet()
     )
 
     private fun configFromJson(json: JSONObject) = configFromSnapshot(ConfigCodec.fromJson(json))
@@ -450,6 +452,7 @@ class MainActivity : ComponentActivity() {
                     .putLong("revision", snapshot.revision)
                     .putStringSet("allowList", snapshot.allowList.toMutableSet())
                     .putStringSet(KEY_INSTALL_EVENTS, snapshot.installEvents.toMutableSet())
+                    .putStringSet(io.github.zopulus.ffc.util.ConfigSchema.KEY_PROTECTED_APPS, snapshot.protectedApps.toMutableSet())
                 RETIRED_KEYS.forEach(editor::remove)
                 snapshot.options.forEach { (key, enabled) -> editor.putBoolean(key, enabled) }
                 editor.commit()
@@ -463,6 +466,7 @@ class MainActivity : ComponentActivity() {
     private fun FcmfixConfig.toJson() = JSONObject()
         .put("allowList", JSONArray(allowedPackages.sorted()))
         .put(KEY_INSTALL_EVENTS, JSONArray(installEvents.toList()))
+        .put(io.github.zopulus.ffc.util.ConfigSchema.KEY_PROTECTED_APPS, JSONArray(protectedApps.sorted()))
         .put(KEY_AUTO_ALLOW_NEW_APPS, autoAllowNewApps)
         .put(KEY_DISABLE_AUTO_CLEAN_NOTIFICATION, disableAutoCleanNotification)
         .put(KEY_INCLUDE_ICEBOX_DISABLED_APP, includeIceBoxDisabledApps)

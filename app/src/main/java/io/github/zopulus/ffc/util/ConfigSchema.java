@@ -12,6 +12,8 @@ public final class ConfigSchema {
     public static final String KEY_ROOT_DEEP_SLEEP_NETWORK_WHITELIST = "rootDeepSleepNetworkWhitelist";
     public static final String KEY_AUTO_ALLOW_NEW_APPS = "autoAllowNewApps";
     public static final String KEY_INSTALL_EVENTS = "installEvents";
+    /** HyperOS: packages the user chose to keep out of the freezer and the memory killer (costs battery). */
+    public static final String KEY_PROTECTED_APPS = "protectedApps";
     public static final List<String> RETIRED_KEYS = List.of("disableGoogleNetworkControl",
             "autoAllowExcluded", "autoAllowOnNotificationGrant", "notificationEnableEvents");
     public static final List<String> OPTIONS = List.of(KEY_DISABLE_AUTO_CLEAN_NOTIFICATION,

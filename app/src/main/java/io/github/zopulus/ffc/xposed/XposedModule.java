@@ -234,6 +234,12 @@ public abstract class XposedModule {
         }
     };
 
+    /** Packages the user chose to keep out of the freezer and the memory killer (empty until config loads). */
+    protected static java.util.Set<String> protectedPackages() {
+        ConfigSnapshot snapshot = config;
+        return snapshot == null ? java.util.Collections.emptySet() : snapshot.protectedApps;
+    }
+
     protected static boolean isDeliveryTargetAllowed(String packageName) {
         ConfigSnapshot snapshot = config;
         return snapshot != null && packageName != null && snapshot.allowList.contains(packageName);
@@ -314,6 +320,7 @@ public abstract class XposedModule {
                 throw new IllegalStateException("provider 无数据");
             }
             Set<String> allowListTmp = new HashSet<>();
+            Set<String> protectedTmp = new HashSet<>();
             boolean init = false;
             long revision = 0;
             HashMap<String, Object> values = new HashMap<>();
@@ -322,6 +329,7 @@ public abstract class XposedModule {
                 String key = cursor.getString(cursor.getColumnIndex("key"));
                 String value = cursor.getString(cursor.getColumnIndex("value"));
                 if ("allowList".equals(key)) allowListTmp.add(value);
+                else if (ConfigSchema.KEY_PROTECTED_APPS.equals(key)) protectedTmp.add(value);
                 else if ("revision".equals(key)) revision = Long.parseLong(value);
                 else if ("init".equals(key)) init = "1".equals(value);
                 else if (ConfigSchema.OPTIONS.contains(key))
@@ -329,6 +337,7 @@ public abstract class XposedModule {
             } while (cursor.moveToNext());
             if (!init) throw new IllegalStateException("provider 未初始化");
             values.put("allowList", allowListTmp);
+            values.put(ConfigSchema.KEY_PROTECTED_APPS, protectedTmp);
             values.put("revision", revision);
             ConfigSnapshot snapshot = new ConfigSnapshot(values);
             if (config == null || snapshot.revision >= config.revision) config = snapshot;

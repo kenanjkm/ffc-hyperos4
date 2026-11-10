@@ -1,5 +1,11 @@
 # 更新记录
 
+## 2026111101-hyperos4（100）
+
+- **Kritik uygulama koruması (HyperOS, isteğe bağlı):** Ayarlar'da seçilen uygulamalar Greeze tarafından dondurulmaz ve bellek yöneticisi (UMMS) tarafından arka planda kapatılmaz. Kendi bildirim kanalını kullanan uygulamalar içindir: Instagram'ın `:fbns` süreci cihazda `umms_launch`/`umms_pressure` ile defalarca kapatılıyordu ve kendi push bağlantısı her seferinde kopuyordu. Kritik bellek durumunda (minAdj ≤ 200) sistem yine kapatabilir.
+- Pil: seçilen uygulamalar arka planda çalışmaya devam eder; arayüzde uyarı var, varsayılan olarak hiçbir uygulama seçili değil.
+- Birim testleri: `ProtectedAppsConfigTest`.
+
 ## 2026111004-hyperos4（99）
 
 - HyperOS'ta ColorOS'a özgü hook grupları (AutoStartFix, OplusProxyFix, OplusGoogleNetworkFix, OplusDeviceIdleFix) artık hiç başlatılmıyor: açılışta 22 başarısız sınıf araması ve hiç tetiklenmeyen bir hook kalktı. ColorOS'ta davranış aynı.

@@ -26,6 +26,10 @@ public final class ConfigCodec {
             values.put(ConfigSchema.KEY_INSTALL_EVENTS,
                     readStringSet(json.getJSONArray(ConfigSchema.KEY_INSTALL_EVENTS)));
         }
+        if (json.has(ConfigSchema.KEY_PROTECTED_APPS)) {
+            values.put(ConfigSchema.KEY_PROTECTED_APPS,
+                    readStringSet(json.getJSONArray(ConfigSchema.KEY_PROTECTED_APPS)));
+        }
         for (String key : ConfigSchema.OPTIONS) if (json.has(key)) values.put(key, json.get(key));
         return new ConfigSnapshot(values);
     }
