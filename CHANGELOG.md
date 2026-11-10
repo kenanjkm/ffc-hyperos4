@@ -1,5 +1,10 @@
 # 更新记录
 
+## 2026111003-hyperos4（98）
+
+- Hook durumu kartı: diğer üreticiye ait gruplar (HyperOS'ta ColorOS/Oplus/Hans grupları) artık "kurulamadı" sayılmıyor; "bu cihaza uygulanmaz" olarak ayrı listeleniyor. Uyarı yalnızca bu sisteme ait bir hook kurulamazsa çıkar.
+- Cihazda doğrulandı (HyperOS 4 / Android 17): HyperOS'a ait 16 grubun tamamı kuruluyor, "GMS'yi uyanık tut" hook'u dahil.
+
 ## 2026111002-hyperos4（97）
 
 - Ana sayfaya **Hook durumu** kartı eklendi: system_server açılışta hangi hook gruplarının kurulduğunu (ve kurulamayanların hatasını) bir kez modül uygulamasına bildirir; karta dokununca liste açılır. Rapor önceki açılıştansa uyarı gösterilir.
