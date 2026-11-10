@@ -80,6 +80,31 @@ data class HookEntry(val name: String, val ok: Boolean, val detail: String)
 /** Hook install results of the current (or last reported) boot; null until system_server reports. */
 data class HookReport(val time: Long, val bootTime: Long, val hooks: List<HookEntry>) {
     val okCount: Int get() = hooks.count { it.ok }
+
+    /**
+     * Hook groups that only exist on the other vendor's ROM. On HyperOS the ColorOS (Oplus/Hans)
+     * groups fail with "class not found" by design, and vice versa; they are not errors there.
+     */
+    fun applicable(hyperOs: Boolean): List<HookEntry> = hooks.filterNot { isForeign(it, hyperOs) }
+    fun notApplicable(hyperOs: Boolean): List<HookEntry> = hooks.filter { isForeign(it, hyperOs) }
+
+    private fun isForeign(entry: HookEntry, hyperOs: Boolean): Boolean {
+        val colorOsOnly = entry.name.startsWith("Oplus") || entry.name.startsWith("Hans") ||
+            entry.name in COLOR_OS_GROUPS
+        val hyperOsOnly = entry.name.startsWith("HyperOS") || entry.name == "HyperOsFix"
+        return if (hyperOs) colorOsOnly && !entry.ok else hyperOsOnly && !entry.ok
+    }
+
+    private companion object {
+        val COLOR_OS_GROUPS = setOf(
+            "setGmsRestricted", "isGoogleRestricInfoOn", "isAppClassifyRestricted",
+            "isAllowStartFromBindService", "isAllowStartFromStartService", "isSysRestrictionCpn",
+            "OAppNetControlService", "CpnProxy broadcast", "isGmsRestricted", "weak-signal net whitelist",
+            "validStartProcessFromBroadcast", "malicious broadcast check", "malicious service check",
+            "link-start broadcast check", "night network whitelist", "Google network firewall",
+            "Google restrict broadcast", "deep-sleep GMS force-stop"
+        )
+    }
     /** True when the report belongs to the running boot (bootTime matches within tolerance). */
     val currentBoot: Boolean
         get() = kotlin.math.abs(bootTime - (System.currentTimeMillis() - android.os.SystemClock.elapsedRealtime())) < 60_000L

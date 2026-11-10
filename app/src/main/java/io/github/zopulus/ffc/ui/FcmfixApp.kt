@@ -308,7 +308,7 @@ private fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         HomeStatusCard(connected = state.xposedConnected, versionName = versionName)
-        HookStatusCard(report = state.hookReport)
+        HookStatusCard(report = state.hookReport, hyperOs = hyperOs)
         SystemInfoCard()
         SegmentedInfoList(
             items = listOf(
@@ -413,16 +413,20 @@ private fun HomeStatusCard(connected: Boolean, versionName: String) {
 /** Which hook groups system_server installed at boot, as reported through ConfigProvider. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HookStatusCard(report: HookReport?) {
+private fun HookStatusCard(report: HookReport?, hyperOs: Boolean) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val title = stringResource(R.string.hook_status_title)
+    // Only the groups that exist on this ROM count; the other vendor's groups are listed separately.
+    val applicable = report?.applicable(hyperOs).orEmpty()
+    val foreign = report?.notApplicable(hyperOs).orEmpty()
+    val okCount = applicable.count { it.ok }
     val summary = when {
         report == null -> stringResource(R.string.hook_status_none)
-        !report.currentBoot -> stringResource(R.string.hook_status_stale, report.okCount, report.hooks.size)
-        report.okCount == report.hooks.size -> stringResource(R.string.hook_status_all_ok, report.hooks.size)
-        else -> stringResource(R.string.hook_status_partial, report.okCount, report.hooks.size)
+        !report.currentBoot -> stringResource(R.string.hook_status_stale, okCount, applicable.size)
+        okCount == applicable.size -> stringResource(R.string.hook_status_all_ok, applicable.size)
+        else -> stringResource(R.string.hook_status_partial, okCount, applicable.size)
     }
-    val warn = report != null && (report.okCount != report.hooks.size || !report.currentBoot)
+    val warn = report != null && (okCount != applicable.size || !report.currentBoot)
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceBright,
@@ -447,7 +451,7 @@ private fun HookStatusCard(report: HookReport?) {
                 }
             }
             if (expanded && report != null) {
-                report.hooks.forEach { hook ->
+                applicable.forEach { hook ->
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(
                             imageVector = if (hook.ok) Icons.Filled.Check else Icons.Filled.Close,
@@ -464,6 +468,19 @@ private fun HookStatusCard(report: HookReport?) {
                             }
                         }
                     }
+                }
+                if (foreign.isNotEmpty()) {
+                    Text(
+                        stringResource(R.string.hook_status_not_applicable, foreign.size,
+                            if (hyperOs) "ColorOS" else "HyperOS"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        foreign.joinToString(" · ") { it.name },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
                 }
             }
         }
