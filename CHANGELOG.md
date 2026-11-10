@@ -1,5 +1,10 @@
 # 更新记录
 
+## 2026111002-hyperos4（97）
+
+- Ana sayfaya **Hook durumu** kartı eklendi: system_server açılışta hangi hook gruplarının kurulduğunu (ve kurulamayanların hatasını) bir kez modül uygulamasına bildirir; karta dokununca liste açılır. Rapor önceki açılıştansa uyarı gösterilir.
+- Bildirim mekanizması: mevcut açılış/kilit açma başlatmasına bağlı tek seferlik `ContentProvider.call`; alarm, periyodik iş veya wakelock yok.
+
 ## 2026111001-hyperos4（96）
 
 - HyperOS: Greeze'nin PID tabanlı dondurma yolları da teslim penceresine uyuyor (`freezePids`, `freezeProcess`). PowerKeeper, uygulamaların ana olmayan süreçlerini bu yoldan donduruyordu (`ActionExecute.freezeNonKeyProcesses`); çok süreçli uygulamalarda FCM işlenirken yan süreç dondurulabiliyordu.

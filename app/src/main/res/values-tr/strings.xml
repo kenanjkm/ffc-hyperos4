@@ -74,4 +74,9 @@
     <string name="toast_no_browser">Kullanılabilir tarayıcı yok</string>
     <string name="doze_title_hyperos">GMS\'yi uyanık tut</string>
     <string name="doze_summary_hyperos">Ekran kapalıyken HyperOS\'un (Greeze) GMS\'yi dondurmasını ve ağını kısıtlamasını engeller; FCM bildirimleri için gereklidir</string>
+    <string name="hook_status_title">Hook durumu</string>
+    <string name="hook_status_none">Bu açılış için henüz rapor yok. Modülü güncelledikten sonra bir kez yeniden başlatın.</string>
+    <string name="hook_status_all_ok">Bu açılışta %1$d hook grubunun tamamı kuruldu. Ayrıntı için dokunun</string>
+    <string name="hook_status_partial">%1$d / %2$d hook grubu kuruldu. Kurulamayanlar için dokunun</string>
+    <string name="hook_status_stale">Rapor önceki açılıştan (%1$d / %2$d). Yeniden başlatıp tekrar bakın</string>
 </resources>

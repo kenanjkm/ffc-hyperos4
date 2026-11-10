@@ -75,4 +75,9 @@
     <string name="toast_no_browser">没有可用的浏览器</string>
     <string name="doze_title_hyperos">保持 GMS 唤醒</string>
     <string name="doze_summary_hyperos">阻止 HyperOS（Greeze）在息屏时冻结 GMS 或限制其联网，FCM 推送需要此项</string>
+    <string name="hook_status_title">Hook 状态</string>
+    <string name="hook_status_none">尚未收到本次开机的报告。模块更新后需重启一次。</string>
+    <string name="hook_status_all_ok">本次开机 %1$d 个 Hook 组全部安装成功。点击查看</string>
+    <string name="hook_status_partial">%1$d / %2$d 个 Hook 组安装成功。点击查看失败项</string>
+    <string name="hook_status_stale">报告来自上次开机（%1$d / %2$d）。请重启后再查看</string>
 </resources>

@@ -152,6 +152,7 @@ public abstract class XposedModule {
         bootInitInvoked = true;
         // 开机/解锁时立即加载一次配置，避免第一条 FCM 推送因配置未加载而被丢弃
         onUpdateConfig();
+        if ("android".equals(getSelfPackageName())) publishHookStatus();
         for (XposedModule instance : instances) {
             try {
                 instance.onCanReadConfig();
@@ -162,6 +163,26 @@ public abstract class XposedModule {
     }
 
     protected void onCanReadConfig() throws Throwable {
+    }
+
+    /**
+     * Hand the hook install results to the module app once per boot, off the caller's thread.
+     * The provider may not be reachable right at unlock; retry a few times with plain sleep
+     * (monotonic, never wakes the device). No alarm, no periodic work.
+     */
+    private static void publishHookStatus() {
+        Thread thread = new Thread(() -> {
+            for (int attempt = 0; attempt < 12; attempt++) {
+                if (io.github.zopulus.ffc.util.HookStatus.publish(context, SELF_PACKAGE_NAME + ".provider")) {
+                    printLog("hook status published");
+                    return;
+                }
+                try { Thread.sleep(10_000L); } catch (InterruptedException e) { return; }
+            }
+            printLog("hook status publish failed");
+        }, "fcmfix-hook-status");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     protected static boolean isConfigurationReady() { return config != null; }
