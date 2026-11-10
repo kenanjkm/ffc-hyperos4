@@ -11,6 +11,7 @@ public final class ConfigSnapshot {
     public final long revision;
     public final Set<String> allowList;
     public final Set<String> installEvents;
+    public final Set<String> protectedApps;
     public final Map<String, Boolean> options;
 
     public ConfigSnapshot(Map<String, ?> values) {
@@ -19,6 +20,7 @@ public final class ConfigSnapshot {
         revision = stamp == null ? 0 : ((Number) stamp).longValue();
         allowList = readStringSet(values, "allowList");
         installEvents = readStringSet(values, ConfigSchema.KEY_INSTALL_EVENTS);
+        protectedApps = readStringSet(values, ConfigSchema.KEY_PROTECTED_APPS);
         Map<String, Boolean> flags = new HashMap<>();
         for (String key : ConfigSchema.OPTIONS) {
             Object value = values.get(key);
@@ -37,6 +39,9 @@ public final class ConfigSnapshot {
                 || !Long.valueOf(revision).equals(values.get("revision"))
                 || !allowList.equals(values.get("allowList"))
                 || !installEvents.equals(values.get(ConfigSchema.KEY_INSTALL_EVENTS))) return false;
+        // Older stores have no protectedApps key; that is the same as an empty set.
+        Object storedProtected = values.get(ConfigSchema.KEY_PROTECTED_APPS);
+        if (!protectedApps.equals(storedProtected == null ? Collections.emptySet() : storedProtected)) return false;
         for (String key : ConfigSchema.OPTIONS)
             if (!options.get(key).equals(values.get(key))) return false;
         return Collections.disjoint(values.keySet(), ConfigSchema.RETIRED_KEYS);

@@ -40,6 +40,7 @@ public class ConfigProvider extends ContentProvider {
             for (String key : ConfigSchema.OPTIONS)
                 data.addRow(new Object[]{key, snapshot.options.get(key) ? "1" : "0"});
             for (String name : snapshot.allowList) data.addRow(new Object[]{"allowList", name});
+            for (String name : snapshot.protectedApps) data.addRow(new Object[]{ConfigSchema.KEY_PROTECTED_APPS, name});
         } catch (Exception error) { android.util.Log.w("fcmfix", "Config file unavailable", error); }
         return data;
     }

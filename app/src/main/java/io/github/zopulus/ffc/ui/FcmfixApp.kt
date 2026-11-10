@@ -11,6 +11,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -56,6 +58,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -272,6 +275,7 @@ fun FcmfixApp(
                 MainTab.SETTINGS -> SettingsScreen(
                     modifier = pageModifier,
                     state = state,
+                    apps = apps,
                     launcherIconHidden = launcherIconHidden,
                     onConfigChange = onConfigChange,
                     onLauncherIconHiddenChange = onLauncherIconHiddenChange
@@ -819,6 +823,7 @@ private fun AppRow(
 private fun SettingsScreen(
     modifier: Modifier,
     state: FcmfixUiState,
+    apps: List<InstalledApp>,
     launcherIconHidden: Boolean,
     onConfigChange: (FcmfixConfig) -> Unit,
     onLauncherIconHiddenChange: (Boolean) -> Unit
@@ -827,6 +832,20 @@ private fun SettingsScreen(
     val config = state.config
     var showRootWarning by rememberSaveable { mutableStateOf(false) }
     var showHideLauncherIconWarning by rememberSaveable { mutableStateOf(false) }
+    var showProtectedApps by rememberSaveable { mutableStateOf(false) }
+
+    if (showProtectedApps) {
+        ProtectedAppsDialog(
+            // Only apps already allowed for FCM can be protected; keep currently protected ones listed too.
+            apps = apps.filter { it.packageName in config.allowedPackages || it.packageName in config.protectedApps },
+            selected = config.protectedApps,
+            onConfirm = { chosen ->
+                showProtectedApps = false
+                onConfigChange(config.copy(protectedApps = chosen))
+            },
+            onDismiss = { showProtectedApps = false }
+        )
+    }
 
     if (showRootWarning) {
         AlertDialog(
@@ -944,6 +963,22 @@ private fun SettingsScreen(
             )
         }
 
+        if (hyperOs) item {
+            SettingsGroup(
+                title = stringResource(R.string.protected_group),
+                items = listOf(
+                    SettingEntry(
+                        icon = ImageVector.vectorResource(R.drawable.ic_shield),
+                        title = stringResource(R.string.protected_title),
+                        summary = if (config.protectedApps.isEmpty()) stringResource(R.string.protected_summary_none)
+                            else stringResource(R.string.protected_summary_some, config.protectedApps.size),
+                        checked = config.protectedApps.isNotEmpty(),
+                        onCheckedChange = { showProtectedApps = true }
+                    )
+                )
+            )
+        }
+
         item {
             SettingsGroup(
                 title = stringResource(R.string.other_group),
@@ -1035,6 +1070,55 @@ private fun SettingRow(item: SettingEntry, index: Int, count: Int, modifier: Mod
             )
         },
         content = { Text(item.title, color = if (item.enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)) }
+    )
+}
+
+/** Pick apps that HyperOS must neither freeze nor kill in the background. Costs battery; opt-in per app. */
+@Composable
+private fun ProtectedAppsDialog(
+    apps: List<InstalledApp>,
+    selected: Set<String>,
+    onConfirm: (Set<String>) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var chosen by remember(selected) { mutableStateOf(selected) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Outlined.Warning, contentDescription = null) },
+        title = { Text(stringResource(R.string.protected_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.protected_warning), style = MaterialTheme.typography.bodyMedium)
+                if (apps.isEmpty()) {
+                    Text(stringResource(R.string.protected_empty), style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
+                        items(apps, key = { it.packageName }) { app ->
+                            val checked = app.packageName in chosen
+                            val toggle = { chosen = if (checked) chosen - app.packageName else chosen + app.packageName }
+                            Row(
+                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                                    .clickable { toggle() }.padding(vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Image(
+                                    bitmap = app.icon.asImageBitmap(),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(36.dp).clip(RoundedCornerShape(10.dp))
+                                )
+                                Text(app.label, modifier = Modifier.weight(1f), maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis)
+                                Checkbox(checked = checked, onCheckedChange = { toggle() })
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { onConfirm(chosen) }) { Text(stringResource(R.string.ok)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }
     )
 }
 

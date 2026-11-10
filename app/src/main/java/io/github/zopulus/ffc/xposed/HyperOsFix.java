@@ -49,6 +49,7 @@ public class HyperOsFix extends XposedModule {
         HookInstaller.install("HyperOS Greeze freeze", this::hookGreezeFreeze);
         HookInstaller.install("HyperOS Greeze GMS limit", this::hookGreezeGmsLimit);
         HookInstaller.install("HyperOS local notification", this::hookLocalNotification);
+        HookInstaller.install("HyperOS memory killer", this::hookMemoryKiller);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -293,6 +294,7 @@ public class HyperOsFix extends XposedModule {
 
     private boolean keepUnfrozen(int uid) {
         if (uid < 10000) return false;
+        if (isProtectedUid(uid)) return true;
         String windowPackage = OplusProxyFix.getFcmDeliveryPackage(uid);
         if (windowPackage != null && isDeliveryTargetAllowed(windowPackage)) return true;
         return isGmsAppUid(uid) && protectGms();
@@ -302,6 +304,56 @@ public class HyperOsFix extends XposedModule {
         if (uid < 10000 || packageName == null) return false;
         String windowPackage = OplusProxyFix.getFcmDeliveryPackage(uid);
         return packageName.equals(windowPackage) && isDeliveryTargetAllowed(windowPackage);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Critical app protection (opt-in per app, costs battery)
+    // ---------------------------------------------------------------------------------------------
+
+    // UMMS (ProcessKillerForUMMS) asks this before killing a background process; a non-null reason
+    // means "skip". Instagram's own push process (:fbns) was killed here with umms_launch/umms_pressure.
+    // String getSystemCleanWhiteListSkipReason(ProcessRecord app, int minAdj, int adj)
+    private void hookMemoryKiller() {
+        Class<?> killer = XposedHelpers.findClass("com.android.server.am.ProcessKillerForUMMS", classLoader);
+        Method method = null;
+        for (Method m : killer.getDeclaredMethods()) {
+            if ("getSystemCleanWhiteListSkipReason".equals(m.getName()) && m.getParameterCount() == 3
+                    && m.getReturnType() == String.class) method = m;
+        }
+        if (method == null) throw new NoSuchMethodError("ProcessKillerForUMMS#getSystemCleanWhiteListSkipReason");
+        XposedBridge.hookMethod(method, new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) {
+                Object app = param.args[0];
+                // minAdj <= 200 is critical memory pressure: leave the system its last resort.
+                if (app == null || !(param.args[1] instanceof Integer) || (Integer) param.args[1] <= 200) return;
+                Object uid = XposedHelpers.getObjectField(app, "uid");
+                if (uid instanceof Integer && isProtectedUid((Integer) uid)) {
+                    logOnce("HyperOS memory killer skips protected uid " + uid);
+                    param.setResult("fcmfix-protected");
+                }
+            }
+        });
+    }
+
+    private static volatile java.util.Set<String> protectedCacheKey = java.util.Collections.emptySet();
+    private static volatile java.util.Set<Integer> protectedAppIds = java.util.Collections.emptySet();
+
+    /** App-id match for the user's protected packages; resolved again only when the selection changes. */
+    private static boolean isProtectedUid(int uid) {
+        if (uid < 10000) return false;
+        java.util.Set<String> packages = protectedPackages();
+        if (packages.isEmpty()) return false;
+        if (packages != protectedCacheKey) {
+            java.util.Set<Integer> ids = new java.util.HashSet<>();
+            for (String pkg : packages) {
+                int pkgUid = packageUid(pkg);
+                if (pkgUid >= 10000) ids.add(pkgUid % 100000);
+            }
+            protectedAppIds = ids;
+            protectedCacheKey = packages;
+        }
+        return protectedAppIds.contains(uid % 100000);
     }
 
     /** GMS in any user: compares app ids, cached after the first lookup. */

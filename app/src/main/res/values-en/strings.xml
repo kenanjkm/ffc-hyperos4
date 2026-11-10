@@ -82,4 +82,11 @@
     <string name="hook_status_not_applicable">%1$d groups exist only on %2$s and do not apply to this device:</string>
     <string name="hook_alert_title">fcmfix: %1$d hooks not installed</string>
     <string name="hook_alert_text">Not installed: %1$s. The module may need an update after a system update; some push messages can be delayed.</string>
+    <string name="protected_group">Critical app protection</string>
+    <string name="protected_title">Critical app protection (HyperOS)</string>
+    <string name="protected_summary_none">None selected. Selected apps are never frozen or cleaned in the background; this costs battery</string>
+    <string name="protected_summary_some">%1$d apps protected (costs battery)</string>
+    <string name="protected_warning">Selected apps are not frozen by HyperOS (Greeze) and not killed by the memory manager in the background. Meant for apps with their own push channel (e.g. Instagram). They keep running in the background and use more battery; pick only the ones you really need.</string>
+    <string name="protected_empty">Allow apps for FCM wake-up in the Apps tab first.</string>
+    <string name="ok">OK</string>
 </resources>

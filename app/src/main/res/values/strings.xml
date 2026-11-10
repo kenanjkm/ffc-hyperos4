@@ -83,4 +83,11 @@
     <string name="hook_status_not_applicable">这些组只在 %2$s 上存在，本机不适用（%1$d 个）：</string>
     <string name="hook_alert_title">fcmfix：%1$d 个 Hook 未安装</string>
     <string name="hook_alert_text">未安装：%1$s。系统更新后可能需要更新模块，部分推送可能延迟。</string>
+    <string name="protected_group">关键应用保护</string>
+    <string name="protected_title">关键应用保护（HyperOS）</string>
+    <string name="protected_summary_none">未选择。所选应用不会被冻结或在后台被清理，会增加耗电</string>
+    <string name="protected_summary_some">已保护 %1$d 个应用（会增加耗电）</string>
+    <string name="protected_warning">所选应用不会被 HyperOS 冻结（Greeze），也不会被内存管理在后台清理。适用于使用自有推送通道的应用（如 Instagram）。这些应用会在后台持续运行，耗电会增加；请只选择确实需要的应用。</string>
+    <string name="protected_empty">请先在“应用”中允许 FCM 唤醒的应用。</string>
+    <string name="ok">确定</string>
 </resources>

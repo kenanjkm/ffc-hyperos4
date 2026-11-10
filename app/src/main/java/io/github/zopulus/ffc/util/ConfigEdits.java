@@ -22,6 +22,10 @@ public final class ConfigEdits {
             if (!before.allowList.contains(name)) allowed.add(name);
         }
         result.put("allowList", new JSONArray(new TreeSet<>(allowed)));
+        Set<String> guarded = new HashSet<>(latest.protectedApps);
+        for (String name : before.protectedApps) if (!after.protectedApps.contains(name)) guarded.remove(name);
+        for (String name : after.protectedApps) if (!before.protectedApps.contains(name)) guarded.add(name);
+        result.put(ConfigSchema.KEY_PROTECTED_APPS, new JSONArray(new TreeSet<>(guarded)));
         removeRetiredOptions(result);
         for (String key : ConfigSchema.OPTIONS) {
             if (!before.options.get(key).equals(after.options.get(key))) result.put(key, after.options.get(key));
