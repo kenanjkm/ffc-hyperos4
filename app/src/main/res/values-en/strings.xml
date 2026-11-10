@@ -74,4 +74,9 @@
     <string name="toast_no_browser">No browser available</string>
     <string name="doze_title_hyperos">Keep GMS awake</string>
     <string name="doze_summary_hyperos">Stops HyperOS (Greeze) from freezing GMS or limiting its network while the screen is off; needed for FCM push</string>
+    <string name="hook_status_title">Hook status</string>
+    <string name="hook_status_none">No report for this boot yet. Reboot once after updating the module.</string>
+    <string name="hook_status_all_ok">All %1$d hook groups installed at this boot. Tap for details</string>
+    <string name="hook_status_partial">%1$d / %2$d hook groups installed. Tap to see what failed</string>
+    <string name="hook_status_stale">Report is from a previous boot (%1$d / %2$d). Reboot and check again</string>
 </resources>

@@ -61,8 +61,10 @@ public class XposedMain extends io.github.libxposed.api.XposedModule {
         try {
             XposedBridge.log("[fcmfix] start hook " + name);
             task.run();
+            io.github.zopulus.ffc.util.HookStatus.record(name, true, "");
         } catch (Throwable e) {
             XposedBridge.log("[fcmfix] " + name + " 初始化失败: " + e.getMessage());
+            io.github.zopulus.ffc.util.HookStatus.record(name, false, String.valueOf(e));
         }
     }
 

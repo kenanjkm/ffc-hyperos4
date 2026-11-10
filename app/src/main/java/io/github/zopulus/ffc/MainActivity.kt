@@ -74,12 +74,24 @@ enum class ConfigSource {
     DEFAULT
 }
 
+/** One hook group as reported by system_server after boot. */
+data class HookEntry(val name: String, val ok: Boolean, val detail: String)
+
+/** Hook install results of the current (or last reported) boot; null until system_server reports. */
+data class HookReport(val time: Long, val bootTime: Long, val hooks: List<HookEntry>) {
+    val okCount: Int get() = hooks.count { it.ok }
+    /** True when the report belongs to the running boot (bootTime matches within tolerance). */
+    val currentBoot: Boolean
+        get() = kotlin.math.abs(bootTime - (System.currentTimeMillis() - android.os.SystemClock.elapsedRealtime())) < 60_000L
+}
+
 data class FcmfixUiState(
     val config: FcmfixConfig = FcmfixConfig(),
     val configSource: ConfigSource = ConfigSource.DEFAULT,
     val xposedConnected: Boolean = false,
     val appsLoading: Boolean = true,
-    val appsLoadFailed: Boolean = false
+    val appsLoadFailed: Boolean = false,
+    val hookReport: HookReport? = null
 )
 
 /** Optimistic configuration survives Activity recreation while the save queue drains. */
@@ -114,6 +126,9 @@ class MainActivity : ComponentActivity() {
     private val configRefreshQueued = AtomicBoolean()
     private val configObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
         override fun onChange(selfChange: Boolean) { loadConfigFromAvailableSource() }
+    }
+    private val hookStatusObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
+        override fun onChange(selfChange: Boolean) { loadHookReport() }
     }
     private val xposedService: XposedService?
         get() = ConfigMemory.connection.value
@@ -154,6 +169,8 @@ class MainActivity : ComponentActivity() {
         }
         initializeDefaultConfigIfNeeded()
         contentResolver.registerContentObserver(Uri.parse("content://$packageName.provider/config"), false, configObserver)
+        contentResolver.registerContentObserver(Uri.parse("content://$packageName.provider/hookStatus"), false, hookStatusObserver)
+        loadHookReport()
         if (uiState.value.config.includeIceBoxDisabledApps) requestIceBoxPermissionIfNeeded()
         ConfigMemory.bindXposedService()
         lifecycleScope.launch {
@@ -191,7 +208,24 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         contentResolver.unregisterContentObserver(configObserver)
+        contentResolver.unregisterContentObserver(hookStatusObserver)
         super.onDestroy()
+    }
+
+    /** Reads the report system_server handed to ConfigProvider; absent until the first boot with this build. */
+    private fun loadHookReport() {
+        lifecycleScope.launch {
+            val report = withContext(Dispatchers.IO) {
+                runCatching {
+                    val file = java.io.File(applicationContext.filesDir, io.github.zopulus.ffc.util.HookStatus.FILE)
+                    if (!file.exists()) return@runCatching null
+                    val snapshot = io.github.zopulus.ffc.util.HookStatus.Snapshot(JSONObject(file.readText()))
+                    HookReport(snapshot.time, snapshot.bootTime,
+                        snapshot.hooks.map { HookEntry(it[0], it[1] == "1", it[2]) })
+                }.getOrNull()
+            }
+            uiState.value = uiState.value.copy(hookReport = report)
+        }
     }
 
     private fun setLauncherIconHidden(hidden: Boolean) {

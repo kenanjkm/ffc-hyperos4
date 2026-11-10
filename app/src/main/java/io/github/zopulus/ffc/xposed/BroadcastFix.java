@@ -120,6 +120,7 @@ public class BroadcastFix extends XposedModule {
 
         if (hookCount == 0) {
             printLog("broadcastIntentLocked hook 位置查找失败，fcmfix将不会工作。");
+            io.github.zopulus.ffc.util.HookStatus.record("BroadcastFix", false, "broadcastIntentLocked not found");
         } else {
             printLog("broadcastIntentLocked hooks active: " + hookCount);
         }

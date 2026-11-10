@@ -107,6 +107,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import io.github.zopulus.ffc.FcmfixConfig
 import io.github.zopulus.ffc.FcmfixUiState
+import io.github.zopulus.ffc.HookReport
 import io.github.zopulus.ffc.InstalledApp
 
 private enum class MainTab(@StringRes val label: Int, @StringRes val appBarTitle: Int = label) {
@@ -307,6 +308,7 @@ private fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         HomeStatusCard(connected = state.xposedConnected, versionName = versionName)
+        HookStatusCard(report = state.hookReport)
         SystemInfoCard()
         SegmentedInfoList(
             items = listOf(
@@ -405,6 +407,66 @@ private fun HomeStatusCard(connected: Boolean, versionName: String) {
                 )
             }
         )
+    }
+}
+
+/** Which hook groups system_server installed at boot, as reported through ConfigProvider. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HookStatusCard(report: HookReport?) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    val title = stringResource(R.string.hook_status_title)
+    val summary = when {
+        report == null -> stringResource(R.string.hook_status_none)
+        !report.currentBoot -> stringResource(R.string.hook_status_stale, report.okCount, report.hooks.size)
+        report.okCount == report.hooks.size -> stringResource(R.string.hook_status_all_ok, report.hooks.size)
+        else -> stringResource(R.string.hook_status_partial, report.okCount, report.hooks.size)
+    }
+    val warn = report != null && (report.okCount != report.hooks.size || !report.currentBoot)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceBright,
+        shape = MaterialTheme.shapes.large,
+        onClick = { if (report != null) expanded = !expanded }
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(
+                    imageVector = if (report == null) Icons.Outlined.Info
+                        else if (warn) Icons.Outlined.Warning else Icons.Rounded.CheckCircle,
+                    contentDescription = null,
+                    tint = if (warn) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                )
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(title, style = MaterialTheme.typography.titleMedium)
+                    Text(summary, style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            if (expanded && report != null) {
+                report.hooks.forEach { hook ->
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(
+                            imageVector = if (hook.ok) Icons.Filled.Check else Icons.Filled.Close,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = if (hook.ok) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                        )
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(hook.name, style = MaterialTheme.typography.bodyMedium)
+                            if (!hook.ok && hook.detail.isNotBlank()) {
+                                Text(hook.detail, style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 3, overflow = TextOverflow.Ellipsis)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

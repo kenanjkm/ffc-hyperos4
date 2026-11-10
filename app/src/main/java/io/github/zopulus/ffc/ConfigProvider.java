@@ -48,6 +48,22 @@ public class ConfigProvider extends ContentProvider {
             return io.github.zopulus.ffc.util.NewAppInstallStore.handle(getContext(), arg, extras);
         }
         requireReader();
+        if (io.github.zopulus.ffc.util.HookStatus.METHOD.equals(method)) {
+            Bundle result = new Bundle();
+            if (Binder.getCallingUid() != Process.SYSTEM_UID || extras == null) throw new SecurityException("Invalid hook status source");
+            String json = extras.getString(io.github.zopulus.ffc.util.HookStatus.EXTRA_JSON);
+            if (json == null) return result;
+            long identity = Binder.clearCallingIdentity();
+            try {
+                new JSONObject(json); // validate before writing
+                java.io.File file = new java.io.File(getContext().getFilesDir(), io.github.zopulus.ffc.util.HookStatus.FILE);
+                java.nio.file.Files.write(file.toPath(), json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                getContext().getContentResolver().notifyChange(Uri.parse("content://" + getContext().getPackageName() + ".provider/hookStatus"), null);
+                result.putBoolean("ok", true);
+            } catch (Exception error) { android.util.Log.w("fcmfix", "Hook status write failed", error); }
+            finally { Binder.restoreCallingIdentity(identity); }
+            return result;
+        }
         if ("activateFrozenApp".equals(method)) {
             if (Binder.getCallingUid() != Process.SYSTEM_UID || arg == null) throw new SecurityException("Invalid activation request");
             Bundle result = new Bundle();
