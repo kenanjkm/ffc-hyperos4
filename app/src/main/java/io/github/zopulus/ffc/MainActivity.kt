@@ -88,23 +88,9 @@ data class HookReport(val time: Long, val bootTime: Long, val hooks: List<HookEn
     fun applicable(hyperOs: Boolean): List<HookEntry> = hooks.filterNot { isForeign(it, hyperOs) }
     fun notApplicable(hyperOs: Boolean): List<HookEntry> = hooks.filter { isForeign(it, hyperOs) }
 
-    private fun isForeign(entry: HookEntry, hyperOs: Boolean): Boolean {
-        val colorOsOnly = entry.name.startsWith("Oplus") || entry.name.startsWith("Hans") ||
-            entry.name in COLOR_OS_GROUPS
-        val hyperOsOnly = entry.name.startsWith("HyperOS") || entry.name == "HyperOsFix"
-        return if (hyperOs) colorOsOnly && !entry.ok else hyperOsOnly && !entry.ok
-    }
+    private fun isForeign(entry: HookEntry, hyperOs: Boolean): Boolean =
+        io.github.zopulus.ffc.util.HookStatus.isForeign(entry.name, entry.ok, hyperOs)
 
-    private companion object {
-        val COLOR_OS_GROUPS = setOf(
-            "setGmsRestricted", "isGoogleRestricInfoOn", "isAppClassifyRestricted",
-            "isAllowStartFromBindService", "isAllowStartFromStartService", "isSysRestrictionCpn",
-            "OAppNetControlService", "CpnProxy broadcast", "isGmsRestricted", "weak-signal net whitelist",
-            "validStartProcessFromBroadcast", "malicious broadcast check", "malicious service check",
-            "link-start broadcast check", "night network whitelist", "Google network firewall",
-            "Google restrict broadcast", "deep-sleep GMS force-stop"
-        )
-    }
     /** True when the report belongs to the running boot (bootTime matches within tolerance). */
     val currentBoot: Boolean
         get() = kotlin.math.abs(bootTime - (System.currentTimeMillis() - android.os.SystemClock.elapsedRealtime())) < 60_000L
@@ -197,6 +183,7 @@ class MainActivity : ComponentActivity() {
         contentResolver.registerContentObserver(Uri.parse("content://$packageName.provider/hookStatus"), false, hookStatusObserver)
         loadHookReport()
         if (uiState.value.config.includeIceBoxDisabledApps) requestIceBoxPermissionIfNeeded()
+        requestNotificationPermissionIfNeeded()
         ConfigMemory.bindXposedService()
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -265,6 +252,20 @@ class MainActivity : ComponentActivity() {
         } catch (error: Throwable) {
             Toast.makeText(this, getString(R.string.toast_icon_failed), Toast.LENGTH_SHORT).show()
             Log.e(TAG, "Could not change launcher icon visibility", error)
+        }
+    }
+
+    /** Only for the one-off alert when a hook group fails after boot; asked once, never nagged. */
+    private fun requestNotificationPermissionIfNeeded() {
+        try {
+            val permission = android.Manifest.permission.POST_NOTIFICATIONS
+            val prefs = getSharedPreferences("ui", MODE_PRIVATE)
+            if (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+                || prefs.getBoolean("notificationPermissionAsked", false)) return
+            prefs.edit().putBoolean("notificationPermissionAsked", true).apply()
+            requestPermissions(arrayOf(permission), 2)
+        } catch (error: Throwable) {
+            Log.w(TAG, "Notification permission request unavailable", error)
         }
     }
 

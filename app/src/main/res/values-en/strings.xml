@@ -80,4 +80,6 @@
     <string name="hook_status_partial">%1$d / %2$d hook groups installed. Tap to see what failed</string>
     <string name="hook_status_stale">Report is from a previous boot (%1$d / %2$d). Reboot and check again</string>
     <string name="hook_status_not_applicable">%1$d groups exist only on %2$s and do not apply to this device:</string>
+    <string name="hook_alert_title">fcmfix: %1$d hooks not installed</string>
+    <string name="hook_alert_text">Not installed: %1$s. The module may need an update after a system update; some push messages can be delayed.</string>
 </resources>

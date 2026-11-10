@@ -1039,10 +1039,4 @@ private fun SettingRow(item: SettingEntry, index: Int, count: Int, modifier: Mod
 }
 
 /** HyperOS (Xiaomi) build: ColorOS-only options are hidden and labels describe the HyperOS behaviour. */
-internal fun isHyperOs(): Boolean {
-    val miOs = runCatching {
-        val get = Class.forName("android.os.SystemProperties").getMethod("get", String::class.java)
-        (get.invoke(null, "ro.mi.os.version.name") as? String).orEmpty()
-    }.getOrDefault("")
-    return miOs.isNotBlank() || Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true)
-}
+internal fun isHyperOs(): Boolean = io.github.zopulus.ffc.util.RomInfo.isHyperOs()

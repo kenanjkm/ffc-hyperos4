@@ -185,13 +185,7 @@ public class HyperOsFix extends XposedModule {
             protected void beforeHookedMethod(MethodHookParam param) {
                 int[] uids = (int[]) param.args[0];
                 if (uids == null) return;
-                int keep = 0;
-                for (int uid : uids) if (!keepUnfrozen(uid)) keep++;
-                if (keep == uids.length) return;
-                int[] filtered = new int[keep];
-                int i = 0;
-                for (int uid : uids) if (!keepUnfrozen(uid)) filtered[i++] = uid;
-                param.args[0] = filtered;
+                param.args[0] = io.github.zopulus.ffc.util.IdFilter.without(uids, uid -> keepUnfrozen(uid));
             }
         });
         // PowerKeeper freezes an app's non-key processes by PID (ActionExecute.freezeNonKeyProcesses ->
@@ -205,13 +199,7 @@ public class HyperOsFix extends XposedModule {
             protected void beforeHookedMethod(MethodHookParam param) {
                 int[] pids = (int[]) param.args[0];
                 if (pids == null) return;
-                int keep = 0;
-                for (int pid : pids) if (!keepUnfrozen(uidForPid(pid))) keep++;
-                if (keep == pids.length) return;
-                int[] filtered = new int[keep];
-                int i = 0;
-                for (int pid : pids) if (!keepUnfrozen(uidForPid(pid))) filtered[i++] = pid;
-                param.args[0] = filtered;
+                param.args[0] = io.github.zopulus.ffc.util.IdFilter.without(pids, pid -> keepUnfrozen(uidForPid(pid)));
             }
         });
         // boolean freezeProcess(RunningProcess proc, long timeout, int fromWho, String reason)
@@ -266,7 +254,9 @@ public class HyperOsFix extends XposedModule {
             XposedBridge.hookMethod(method, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) {
-                    if (isDeliveryTargetAllowed((String) param.args[pkgIndex])) param.setResult(result);
+                    String pkg = (String) param.args[pkgIndex];
+                    // The module's own hook alert must not be dropped by MIUI either.
+                    if (SELF_PACKAGE_NAME.equals(pkg) || isDeliveryTargetAllowed(pkg)) param.setResult(result);
                 }
             });
             hooks++;
