@@ -1,5 +1,11 @@
 # 更新记录
 
+## 2026111004-hyperos4（99）
+
+- HyperOS'ta ColorOS'a özgü hook grupları (AutoStartFix, OplusProxyFix, OplusGoogleNetworkFix, OplusDeviceIdleFix) artık hiç başlatılmıyor: açılışta 22 başarısız sınıf araması ve hiç tetiklenmeyen bir hook kalktı. ColorOS'ta davranış aynı.
+- Açılış uyarısı: bu sisteme ait bir hook grubu kurulamazsa (ör. sistem güncellemesinden sonra) açılışta tek bir bildirim gösterilir; hepsi kuruluysa bildirim kaldırılır. Bildirim izni bir kez sorulur. Alarm veya periyodik iş yok.
+- Birim testleri: dondurma filtresi (`IdFilter`) ve hook raporu/uygulanabilirlik mantığı (`HookStatus`).
+
 ## 2026111003-hyperos4（98）
 
 - Hook durumu kartı: diğer üreticiye ait gruplar (HyperOS'ta ColorOS/Oplus/Hans grupları) artık "kurulamadı" sayılmıyor; "bu cihaza uygulanmaz" olarak ayrı listeleniyor. Uyarı yalnızca bu sisteme ait bir hook kurulamazsa çıkar.

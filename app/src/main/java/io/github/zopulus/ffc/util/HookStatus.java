@@ -30,6 +30,26 @@ public final class HookStatus {
 
     private static final List<Entry> ENTRIES = new CopyOnWriteArrayList<>();
 
+    private static final java.util.Set<String> COLOR_OS_GROUPS = java.util.Set.of(
+            "AutoStartFix", "setGmsRestricted", "isGoogleRestricInfoOn", "isAppClassifyRestricted",
+            "isAllowStartFromBindService", "isAllowStartFromStartService", "isSysRestrictionCpn",
+            "OAppNetControlService", "CpnProxy broadcast", "isGmsRestricted", "weak-signal net whitelist",
+            "validStartProcessFromBroadcast", "malicious broadcast check", "malicious service check",
+            "link-start broadcast check", "night network whitelist", "Google network firewall",
+            "Google restrict broadcast", "deep-sleep GMS force-stop");
+
+    /**
+     * A failed group that only exists on the other vendor's ROM: ColorOS (Oplus/Hans) groups on
+     * HyperOS and HyperOS groups on ColorOS. Those fail with "class not found" by design and are
+     * not errors. A group that installed is never foreign.
+     */
+    public static boolean isForeign(String name, boolean ok, boolean hyperOs) {
+        if (ok || name == null) return false;
+        boolean colorOsOnly = name.startsWith("Oplus") || name.startsWith("Hans") || COLOR_OS_GROUPS.contains(name);
+        boolean hyperOsOnly = name.startsWith("HyperOS") || name.equals("HyperOsFix");
+        return hyperOs ? colorOsOnly : hyperOsOnly;
+    }
+
     /** Record one hook group. On a repeated name the newer result wins. */
     public static void record(String name, boolean ok, String detail) {
         if (name == null) return;
@@ -84,6 +104,14 @@ public final class HookStatus {
                 if (hook == null) continue;
                 hooks.add(new String[]{hook.optString("name"), hook.optBoolean("ok") ? "1" : "0", hook.optString("detail")});
             }
+        }
+
+        /** Names of failed groups that belong to this ROM; these are the ones worth an alert. */
+        public List<String> failedApplicable(boolean hyperOs) {
+            List<String> failed = new ArrayList<>();
+            for (String[] hook : hooks)
+                if (!"1".equals(hook[1]) && !isForeign(hook[0], false, hyperOs)) failed.add(hook[0]);
+            return failed;
         }
 
         public int okCount() {

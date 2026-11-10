@@ -24,13 +24,21 @@ public class XposedMain extends io.github.libxposed.api.XposedModule {
         XposedModule.setSelfPackageName("android");
 
         ClassLoader classLoader = param.getClassLoader();
+        // HyperOS has none of the Oplus/Hans classes: starting those groups there only produced
+        // 22 failed lookups per boot and one hook that could never fire. Detect by class presence
+        // (system properties are not a reliable signal inside system_server on every ROM).
+        boolean hyperOs = XposedHelpers.findClassIfExists("com.miui.server.greeze.GreezeManagerService", classLoader) != null
+                && XposedHelpers.findClassIfExists("com.android.server.am.OplusAppStartupManager", classLoader) == null;
+        XposedBridge.log("[fcmfix] ROM: " + (hyperOs ? "HyperOS, ColorOS groups skipped" : "ColorOS/other"));
         safeInit(() -> new BroadcastFix(classLoader), "BroadcastFix");
-        safeInit(() -> new AutoStartFix(classLoader), "AutoStartFix");
         safeInit(() -> new KeepNotification(classLoader), "KeepNotification");
         safeInit(() -> new io.github.zopulus.ffc.xposed.NewAppInstallReceiver(classLoader), "NewAppInstallReceiver");
-        safeInit(() -> new OplusProxyFix(classLoader), "OplusProxyFix");
-        safeInit(() -> new OplusGoogleNetworkFix(classLoader), "OplusGoogleNetworkFix");
-        safeInit(() -> new OplusDeviceIdleFix(classLoader), "OplusDeviceIdleFix");
+        if (!hyperOs) {
+            safeInit(() -> new AutoStartFix(classLoader), "AutoStartFix");
+            safeInit(() -> new OplusProxyFix(classLoader), "OplusProxyFix");
+            safeInit(() -> new OplusGoogleNetworkFix(classLoader), "OplusGoogleNetworkFix");
+            safeInit(() -> new OplusDeviceIdleFix(classLoader), "OplusDeviceIdleFix");
+        }
         safeInit(() -> new io.github.zopulus.ffc.xposed.HyperOsFix(classLoader), "HyperOsFix");
         // system_server 中 attachBaseContext 的 hook 安装过晚，主动获取系统上下文
         initSystemServerContext(classLoader);
