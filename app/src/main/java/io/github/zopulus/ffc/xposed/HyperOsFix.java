@@ -194,6 +194,39 @@ public class HyperOsFix extends XposedModule {
                 param.args[0] = filtered;
             }
         });
+        // PowerKeeper freezes an app's non-key processes by PID (ActionExecute.freezeNonKeyProcesses ->
+        // freezePids), and PerfService uses freezeProcess. Neither goes through freezeAction/freezeUids,
+        // so a multi-process app could still lose a helper process inside the delivery window.
+        // List<Integer> freezePids(int[] pids, long timeout, int fromWho, String reason)
+        Method freezePids = XposedHelpers.findMethodExact(greeze, "freezePids",
+                int[].class, long.class, int.class, String.class);
+        XposedBridge.hookMethod(freezePids, new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) {
+                int[] pids = (int[]) param.args[0];
+                if (pids == null) return;
+                int keep = 0;
+                for (int pid : pids) if (!keepUnfrozen(uidForPid(pid))) keep++;
+                if (keep == pids.length) return;
+                int[] filtered = new int[keep];
+                int i = 0;
+                for (int pid : pids) if (!keepUnfrozen(uidForPid(pid))) filtered[i++] = pid;
+                param.args[0] = filtered;
+            }
+        });
+        // boolean freezeProcess(RunningProcess proc, long timeout, int fromWho, String reason)
+        for (Method method : greeze.getDeclaredMethods()) {
+            if (!"freezeProcess".equals(method.getName()) || method.getParameterCount() != 4) continue;
+            XposedBridge.hookMethod(method, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) {
+                    Object proc = param.args[0];
+                    if (proc == null) return;
+                    Object uid = XposedHelpers.getObjectField(proc, "uid");
+                    if (uid instanceof Integer && keepUnfrozen((Integer) uid)) param.setResult(false);
+                }
+            });
+        }
     }
 
     // CN ROM: PowerKeeper's GmsObserver calls updateGmsNetStatus(true) when Google is unreachable,
@@ -289,6 +322,15 @@ public class HyperOsFix extends XposedModule {
             if (gmsUid >= 10000) gmsAppId = gmsUid % 100000;
         }
         return gmsAppId > 0 && uid % 100000 == gmsAppId;
+    }
+
+    /** Owner UID of a PID from /proc (no Binder, no locks); -1 when the process is gone. */
+    private static int uidForPid(int pid) {
+        try {
+            return android.system.Os.stat("/proc/" + pid).st_uid;
+        } catch (Throwable error) {
+            return -1;
+        }
     }
 
     private static int packageUid(String packageName) {
