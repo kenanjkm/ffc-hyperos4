@@ -1,5 +1,11 @@
 # 更新记录
 
+## 2026111001-hyperos4（96）
+
+- HyperOS: Greeze'nin PID tabanlı dondurma yolları da teslim penceresine uyuyor (`freezePids`, `freezeProcess`). PowerKeeper, uygulamaların ana olmayan süreçlerini bu yoldan donduruyordu (`ActionExecute.freezeNonKeyProcesses`); çok süreçli uygulamalarda FCM işlenirken yan süreç dondurulabiliyordu.
+- Greeze çözme gerekçesi `broadcast` (günlükteki `unknown reason:fcmfix` uyarısı kalktı).
+- Arayüz: HyperOS'ta ColorOS'a özel iki ayar gizlendi; Ice Box ayarının çevirisi düzeltildi.
+
 ## 2026110901-hyperos4（95）
 
 - HyperOS 4 desteği (HyperOS 4 / Android 17 services.jar ve miui-services.jar üzerinde doğrulandı):
