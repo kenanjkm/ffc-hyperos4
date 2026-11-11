@@ -965,6 +965,22 @@ private fun SettingsScreen(
 
         if (hyperOs) item {
             SettingsGroup(
+                title = stringResource(R.string.night_group),
+                items = listOf(
+                    SettingEntry(
+                        icon = ImageVector.vectorResource(R.drawable.ic_bedtime),
+                        title = stringResource(R.string.sleep_mode_title),
+                        summary = stringResource(if (config.hyperOsSleepMode) R.string.sleep_mode_summary_on
+                            else R.string.sleep_mode_summary_off),
+                        checked = config.hyperOsSleepMode,
+                        onCheckedChange = { onConfigChange(config.copy(hyperOsSleepMode = it)) }
+                    )
+                )
+            )
+        }
+
+        if (hyperOs) item {
+            SettingsGroup(
                 title = stringResource(R.string.protected_group),
                 items = listOf(
                     SettingEntry(

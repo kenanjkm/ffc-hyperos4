@@ -307,6 +307,45 @@ public class HyperOsFix extends XposedModule {
     }
 
     // ---------------------------------------------------------------------------------------------
+    // HyperOS sleep mode switch
+    // PowerKeeper's PhoneSleepModeController turns mobile data, Wi-Fi and Bluetooth off when it
+    // decides the user is asleep (seen on device: data off 00:42 -> 06:45, no FCM at all meanwhile).
+    // Its user switch is the PowerKeeper setting "sleep_mode_user" ("on"/"off"), behind a provider
+    // permission only system_server holds, so the module writes it here on the user's behalf.
+    // ---------------------------------------------------------------------------------------------
+
+    private static final android.net.Uri POWERKEEPER_MISC =
+            android.net.Uri.parse("content://com.miui.powerkeeper.configure/SimpleSettings/misc");
+
+    @Override
+    protected void onConfigLoaded(io.github.zopulus.ffc.util.ConfigSnapshot previous,
+                                  io.github.zopulus.ffc.util.ConfigSnapshot current) {
+        if (greezeClass == null || current == null) return;
+        boolean wanted = current.options.getOrDefault(ConfigSchema.KEY_HYPEROS_SLEEP_MODE, true);
+        Boolean before = previous == null ? null : previous.options.get(ConfigSchema.KEY_HYPEROS_SLEEP_MODE);
+        // Only act on the user's choice: "off" whenever it is off (idempotent, also after boot);
+        // "on" only when it was switched back on. Untouched, the system's own setting is left alone.
+        if (!wanted) writeSleepMode("off");
+        else if (Boolean.FALSE.equals(before)) writeSleepMode("on");
+    }
+
+    private static void writeSleepMode(String value) {
+        if (context == null) return;
+        long identity = android.os.Binder.clearCallingIdentity();
+        try {
+            android.os.Bundle extras = new android.os.Bundle();
+            extras.putString("value", value);
+            extras.putInt("_user", 0);
+            context.getContentResolver().call(POWERKEEPER_MISC, "PUT_misc", "sleep_mode_user", extras);
+            printLog("HyperOS sleep mode set to " + value);
+        } catch (Throwable error) {
+            printLog("HyperOS sleep mode switch failed: " + error);
+        } finally {
+            android.os.Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
     // Critical app protection (opt-in per app, costs battery)
     // ---------------------------------------------------------------------------------------------
 
