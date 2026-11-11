@@ -61,6 +61,7 @@ data class FcmfixConfig(
     val autoAllowNewApps: Boolean = defaultValue(KEY_AUTO_ALLOW_NEW_APPS),
     val hyperOsSleepMode: Boolean = defaultValue(KEY_HYPEROS_SLEEP_MODE),
     val sleepModeKeepMobileData: Boolean = defaultValue(KEY_SLEEP_MODE_KEEP_DATA),
+    val greezeGlobalPolicy: Boolean = defaultValue(KEY_GREEZE_GLOBAL_POLICY),
     val installEvents: Set<String> = emptySet(),
     val protectedApps: Set<String> = emptySet()
 )
@@ -368,6 +369,7 @@ class MainActivity : ComponentActivity() {
         autoAllowNewApps = snapshot.options.getValue(KEY_AUTO_ALLOW_NEW_APPS),
         hyperOsSleepMode = snapshot.options.getValue(KEY_HYPEROS_SLEEP_MODE),
         sleepModeKeepMobileData = snapshot.options.getValue(KEY_SLEEP_MODE_KEEP_DATA),
+        greezeGlobalPolicy = snapshot.options.getValue(KEY_GREEZE_GLOBAL_POLICY),
         installEvents = snapshot.installEvents.toSet(),
         protectedApps = snapshot.protectedApps.toSet()
     )
@@ -474,6 +476,7 @@ class MainActivity : ComponentActivity() {
         .put(KEY_AUTO_ALLOW_NEW_APPS, autoAllowNewApps)
         .put(KEY_HYPEROS_SLEEP_MODE, hyperOsSleepMode)
         .put(KEY_SLEEP_MODE_KEEP_DATA, sleepModeKeepMobileData)
+        .put(KEY_GREEZE_GLOBAL_POLICY, greezeGlobalPolicy)
         .put(KEY_DISABLE_AUTO_CLEAN_NOTIFICATION, disableAutoCleanNotification)
         .put(KEY_INCLUDE_ICEBOX_DISABLED_APP, includeIceBoxDisabledApps)
         .put(KEY_DEEP_SLEEP_GOOGLE_WHITELIST, deepSleepGoogleWhitelist)

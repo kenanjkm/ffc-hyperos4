@@ -97,4 +97,7 @@
     <string name="sleep_keep_data_title">睡眠模式下保持移动数据</string>
     <string name="sleep_keep_data_summary">睡眠模式照常运行（Wi-Fi、蓝牙等），只是不关闭移动数据，通知可以到达。需要在 LSPosed 作用域中勾选“电量和性能”</string>
     <string name="sleep_keep_data_summary_disabled">需先开启 HyperOS 睡眠模式</string>
+    <string name="greeze_group">冻结器（Greeze）</string>
+    <string name="greeze_global_title">使用国际版策略</string>
+    <string name="greeze_global_summary">让 Greeze 按国际版 ROM 的方式工作（系统自带的国际策略，而非国行策略）。更改后需重启。属于实验功能：后台应用限制更宽松，耗电可能增加</string>
 </resources>

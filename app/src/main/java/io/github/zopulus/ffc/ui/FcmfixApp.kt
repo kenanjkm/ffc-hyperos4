@@ -965,6 +965,21 @@ private fun SettingsScreen(
 
         if (hyperOs) item {
             SettingsGroup(
+                title = stringResource(R.string.greeze_group),
+                items = listOf(
+                    SettingEntry(
+                        icon = ImageVector.vectorResource(R.drawable.ic_ac_unit),
+                        title = stringResource(R.string.greeze_global_title),
+                        summary = stringResource(R.string.greeze_global_summary),
+                        checked = config.greezeGlobalPolicy,
+                        onCheckedChange = { onConfigChange(config.copy(greezeGlobalPolicy = it)) }
+                    )
+                )
+            )
+        }
+
+        if (hyperOs) item {
+            SettingsGroup(
                 title = stringResource(R.string.night_group),
                 items = listOf(
                     SettingEntry(

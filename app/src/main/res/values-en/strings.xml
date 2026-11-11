@@ -96,4 +96,7 @@
     <string name="sleep_keep_data_title">Keep mobile data in sleep mode</string>
     <string name="sleep_keep_data_summary">Sleep mode keeps working (Wi-Fi, Bluetooth, …) but mobile data stays on so notifications arrive. Needs \"Battery and performance\" in the LSPosed scope</string>
     <string name="sleep_keep_data_summary_disabled">Turn HyperOS sleep mode on first</string>
+    <string name="greeze_group">Freezer (Greeze)</string>
+    <string name="greeze_global_title">Use the global ROM policy</string>
+    <string name="greeze_global_summary">Makes Greeze behave as on global ROMs (the international policy that ships in the system, instead of the China one). Reboot after changing. Experimental: background apps are restricted less, battery use may rise</string>
 </resources>
