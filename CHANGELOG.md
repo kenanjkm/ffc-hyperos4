@@ -1,5 +1,9 @@
 # 更新记录
 
+## 2026111102-hyperos4（101）
+
+- **HyperOS uyku modu anahtarı:** Ayarlar → Gece. HyperOS'un PowerKeeper "uyku modu", kullanıcının uyuduğuna karar verince mobil veriyi, Wi-Fi'yi ve Bluetooth'u kapatıyor; cihazda 00:42–06:45 arası hiçbir FCM gelmedi. Anahtar kapatılınca modül (system_server) PowerKeeper'daki `sleep_mode_user` ayarını `off` yapar; tekrar açılınca `on`. Kullanıcı dokunmadıkça sistemin ayarına yazılmaz.
+
 ## 2026111101-hyperos4（100）
 
 - **Kritik uygulama koruması (HyperOS, isteğe bağlı):** Ayarlar'da seçilen uygulamalar Greeze tarafından dondurulmaz ve bellek yöneticisi (UMMS) tarafından arka planda kapatılmaz. Kendi bildirim kanalını kullanan uygulamalar içindir: Instagram'ın `:fbns` süreci cihazda `umms_launch`/`umms_pressure` ile defalarca kapatılıyordu ve kendi push bağlantısı her seferinde kopuyordu. Kritik bellek durumunda (minAdj ≤ 200) sistem yine kapatabilir.

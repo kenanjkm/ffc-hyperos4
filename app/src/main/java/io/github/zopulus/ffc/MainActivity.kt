@@ -59,6 +59,7 @@ data class FcmfixConfig(
     val dozeGoogleWhitelist: Boolean = defaultValue(KEY_DOZE_GOOGLE_WHITELIST),
     val rootDeepSleepNetworkWhitelist: Boolean = false,
     val autoAllowNewApps: Boolean = defaultValue(KEY_AUTO_ALLOW_NEW_APPS),
+    val hyperOsSleepMode: Boolean = defaultValue(KEY_HYPEROS_SLEEP_MODE),
     val installEvents: Set<String> = emptySet(),
     val protectedApps: Set<String> = emptySet()
 )
@@ -364,6 +365,7 @@ class MainActivity : ComponentActivity() {
         dozeGoogleWhitelist = snapshot.options.getValue(KEY_DOZE_GOOGLE_WHITELIST),
         rootDeepSleepNetworkWhitelist = snapshot.options.getValue(KEY_ROOT_DEEP_SLEEP_NETWORK_WHITELIST),
         autoAllowNewApps = snapshot.options.getValue(KEY_AUTO_ALLOW_NEW_APPS),
+        hyperOsSleepMode = snapshot.options.getValue(KEY_HYPEROS_SLEEP_MODE),
         installEvents = snapshot.installEvents.toSet(),
         protectedApps = snapshot.protectedApps.toSet()
     )
@@ -468,6 +470,7 @@ class MainActivity : ComponentActivity() {
         .put(KEY_INSTALL_EVENTS, JSONArray(installEvents.toList()))
         .put(io.github.zopulus.ffc.util.ConfigSchema.KEY_PROTECTED_APPS, JSONArray(protectedApps.sorted()))
         .put(KEY_AUTO_ALLOW_NEW_APPS, autoAllowNewApps)
+        .put(KEY_HYPEROS_SLEEP_MODE, hyperOsSleepMode)
         .put(KEY_DISABLE_AUTO_CLEAN_NOTIFICATION, disableAutoCleanNotification)
         .put(KEY_INCLUDE_ICEBOX_DISABLED_APP, includeIceBoxDisabledApps)
         .put(KEY_DEEP_SLEEP_GOOGLE_WHITELIST, deepSleepGoogleWhitelist)

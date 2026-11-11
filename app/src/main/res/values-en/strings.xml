@@ -89,4 +89,8 @@
     <string name="protected_warning">Selected apps are not frozen by HyperOS (Greeze) and not killed by the memory manager in the background. Meant for apps with their own push channel (e.g. Instagram). They keep running in the background and use more battery; pick only the ones you really need.</string>
     <string name="protected_empty">Allow apps for FCM wake-up in the Apps tab first.</string>
     <string name="ok">OK</string>
+    <string name="night_group">Night</string>
+    <string name="sleep_mode_title">HyperOS sleep mode</string>
+    <string name="sleep_mode_summary_on">On: when HyperOS decides you are asleep it turns off mobile data, Wi-Fi and Bluetooth; no notifications arrive meanwhile</string>
+    <string name="sleep_mode_summary_off">Off: network stays on at night and notifications keep arriving (slightly more battery)</string>
 </resources>

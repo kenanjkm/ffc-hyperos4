@@ -90,4 +90,8 @@
     <string name="protected_warning">所选应用不会被 HyperOS 冻结（Greeze），也不会被内存管理在后台清理。适用于使用自有推送通道的应用（如 Instagram）。这些应用会在后台持续运行，耗电会增加；请只选择确实需要的应用。</string>
     <string name="protected_empty">请先在“应用”中允许 FCM 唤醒的应用。</string>
     <string name="ok">确定</string>
+    <string name="night_group">夜间</string>
+    <string name="sleep_mode_title">HyperOS 睡眠模式</string>
+    <string name="sleep_mode_summary_on">开启：系统判断你在睡觉时会关闭移动数据、Wi-Fi 和蓝牙，期间收不到任何通知</string>
+    <string name="sleep_mode_summary_off">已关闭：夜间网络保持开启，通知照常到达（耗电略增）</string>
 </resources>
