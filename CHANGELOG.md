@@ -1,5 +1,10 @@
 # 更新记录
 
+## 2026111103-hyperos4（102）
+
+- **Uyku modunda mobil veriyi açık tut (HyperOS):** Ayarlar → Gece. PowerKeeper uyku modu açık kalır (Wi-Fi/Bluetooth/alarm kısıtlamaları sürer, Doze etkilenmez); yalnızca uyku modunun `CommonAdapter.setDataEnabled(…, false)` çağrısı atlanır. Böylece gece GMS bağlantısı ve bildirimler sürer. Kapsama `com.miui.powerkeeper` eklendi.
+- "HyperOS uyku modu" anahtarı yerinde: uyku modunu tamamen kapatmak isteyen için; kapatılmışsa buradan geri açılabilir.
+
 ## 2026111102-hyperos4（101）
 
 - **HyperOS uyku modu anahtarı:** Ayarlar → Gece. HyperOS'un PowerKeeper "uyku modu", kullanıcının uyuduğuna karar verince mobil veriyi, Wi-Fi'yi ve Bluetooth'u kapatıyor; cihazda 00:42–06:45 arası hiçbir FCM gelmedi. Anahtar kapatılınca modül (system_server) PowerKeeper'daki `sleep_mode_user` ayarını `off` yapar; tekrar açılınca `on`. Kullanıcı dokunmadıkça sistemin ayarına yazılmaz.

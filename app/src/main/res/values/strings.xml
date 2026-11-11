@@ -94,4 +94,7 @@
     <string name="sleep_mode_title">HyperOS 睡眠模式</string>
     <string name="sleep_mode_summary_on">开启：系统判断你在睡觉时会关闭移动数据、Wi-Fi 和蓝牙，期间收不到任何通知</string>
     <string name="sleep_mode_summary_off">已关闭：夜间网络保持开启，通知照常到达（耗电略增）</string>
+    <string name="sleep_keep_data_title">睡眠模式下保持移动数据</string>
+    <string name="sleep_keep_data_summary">睡眠模式照常运行（Wi-Fi、蓝牙等），只是不关闭移动数据，通知可以到达。需要在 LSPosed 作用域中勾选“电量和性能”</string>
+    <string name="sleep_keep_data_summary_disabled">需先开启 HyperOS 睡眠模式</string>
 </resources>

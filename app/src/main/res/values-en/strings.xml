@@ -93,4 +93,7 @@
     <string name="sleep_mode_title">HyperOS sleep mode</string>
     <string name="sleep_mode_summary_on">On: when HyperOS decides you are asleep it turns off mobile data, Wi-Fi and Bluetooth; no notifications arrive meanwhile</string>
     <string name="sleep_mode_summary_off">Off: network stays on at night and notifications keep arriving (slightly more battery)</string>
+    <string name="sleep_keep_data_title">Keep mobile data in sleep mode</string>
+    <string name="sleep_keep_data_summary">Sleep mode keeps working (Wi-Fi, Bluetooth, …) but mobile data stays on so notifications arrive. Needs \"Battery and performance\" in the LSPosed scope</string>
+    <string name="sleep_keep_data_summary_disabled">Turn HyperOS sleep mode on first</string>
 </resources>

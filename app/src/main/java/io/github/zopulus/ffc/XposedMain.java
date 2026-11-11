@@ -17,6 +17,7 @@ import io.github.libxposed.api.XposedModuleInterface;
 
 public class XposedMain extends io.github.libxposed.api.XposedModule {
     private boolean batteryHooksInitialized;
+    private boolean powerKeeperHooksInitialized;
 
     @Override
     public void onSystemServerStarting(SystemServerStartingParam param) {
@@ -55,6 +56,13 @@ public class XposedMain extends io.github.libxposed.api.XposedModule {
             XposedModule.setSelfPackageName("com.oplus.battery");
             safeInit(() -> new OplusBatteryNetworkFix(param.getClassLoader()),
                     "OplusBatteryNetworkFix");
+        }
+        // HyperOS PowerKeeper: only the sleep-mode "mobile data off" call is affected.
+        if ("com.miui.powerkeeper".equals(param.getPackageName()) && !powerKeeperHooksInitialized) {
+            powerKeeperHooksInitialized = true;
+            XposedModule.setSelfPackageName("com.miui.powerkeeper");
+            safeInit(() -> new io.github.zopulus.ffc.xposed.PowerKeeperSleepFix(param.getClassLoader()),
+                    "PowerKeeperSleepFix");
         }
     }
 

@@ -93,4 +93,7 @@
     <string name="sleep_mode_title">HyperOS uyku modu</string>
     <string name="sleep_mode_summary_on">Açık: HyperOS uyuduğunuzu düşündüğünde mobil veriyi, Wi-Fi\'yi ve Bluetooth\'u kapatır; bu sürede hiç bildirim gelmez</string>
     <string name="sleep_mode_summary_off">Kapalı: gece internet açık kalır, bildirimler gelmeye devam eder (pil biraz daha fazla gider)</string>
+    <string name="sleep_keep_data_title">Uyku modunda mobil veriyi açık tut</string>
+    <string name="sleep_keep_data_summary">Uyku modu çalışmaya devam eder (Wi-Fi, Bluetooth vb.) ama mobil veri kapanmaz, bildirimler gelir. LSPosed kapsamında \"Pil ve performans\" seçili olmalı</string>
+    <string name="sleep_keep_data_summary_disabled">Önce HyperOS uyku modunu açın</string>
 </resources>
