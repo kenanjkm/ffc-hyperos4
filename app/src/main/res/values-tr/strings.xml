@@ -96,4 +96,7 @@
     <string name="sleep_keep_data_title">Uyku modunda mobil veriyi açık tut</string>
     <string name="sleep_keep_data_summary">Uyku modu çalışmaya devam eder (Wi-Fi, Bluetooth vb.) ama mobil veri kapanmaz, bildirimler gelir. LSPosed kapsamında \"Pil ve performans\" seçili olmalı</string>
     <string name="sleep_keep_data_summary_disabled">Önce HyperOS uyku modunu açın</string>
+    <string name="greeze_group">Dondurucu (Greeze)</string>
+    <string name="greeze_global_title">Global ROM politikasını kullan</string>
+    <string name="greeze_global_summary">Greeze\'yi global ROM\'lardaki gibi çalıştırır (sistemin içindeki uluslararası politika, Çin politikası yerine). Değiştirdikten sonra yeniden başlatın. Deneysel: arka plan uygulamaları daha az kısıtlanır, pil tüketimi artabilir</string>
 </resources>

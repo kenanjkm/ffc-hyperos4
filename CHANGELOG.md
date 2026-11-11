@@ -1,5 +1,9 @@
 # 更新记录
 
+## 2026111104-hyperos4（103）
+
+- **Greeze: global ROM politikası (HyperOS, isteğe bağlı, deneysel):** Ayarlar → Dondurucu (Greeze). Greeze, Çin ve uluslararası politikayı aynı jar içinde taşıyor ve tek bir bayrakla (`PolicyManagerConfig.isCnModel`) seçiyor; Çin ROM'u yurt dışında kullanılırken Çin politikası geçerli (`mCurrentCNPolicy: 1`). Seçenek açıkken bayrak Greeze başlamadan önce "CN değil" yapılır; böylece tüm dallar global ROM'daki yolu izler. Yeniden başlatma gerekir.
+
 ## 2026111103-hyperos4（102）
 
 - **Uyku modunda mobil veriyi açık tut (HyperOS):** Ayarlar → Gece. PowerKeeper uyku modu açık kalır (Wi-Fi/Bluetooth/alarm kısıtlamaları sürer, Doze etkilenmez); yalnızca uyku modunun `CommonAdapter.setDataEnabled(…, false)` çağrısı atlanır. Böylece gece GMS bağlantısı ve bildirimler sürer. Kapsama `com.miui.powerkeeper` eklendi.

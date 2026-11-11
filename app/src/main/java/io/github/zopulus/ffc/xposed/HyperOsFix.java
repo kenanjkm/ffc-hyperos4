@@ -42,6 +42,8 @@ public class HyperOsFix extends XposedModule {
             return;
         }
         greezeClass = XposedHelpers.findClassIfExists(GREEZE, classLoader);
+        // First: it must be in place before GreezeManagerService initialises.
+        HookInstaller.install("HyperOS Greeze global policy", this::hookGreezeRegion);
         HookInstaller.install("HyperOS auto-start", this::hookBroadcastAutoStart);
         HookInstaller.install("HyperOS service auto-start", this::hookServiceAutoStart);
         HookInstaller.install("HyperOS Greeze receiver", this::hookGreezeReceiver);
@@ -307,6 +309,73 @@ public class HyperOsFix extends XposedModule {
     }
 
     // ---------------------------------------------------------------------------------------------
+    // Greeze region policy (opt-in, needs a reboot)
+    //
+    // Greeze ships both policies in the same jar and picks one from a single flag:
+    //   PolicyManagerConfig.sCnModel = "CN".equals(Build.getRegion())      (isCnModel())
+    //   GreezeManagerService init:  PolicyManagerConfig.setCnModel("CN".equals(Build.getRegion()))
+    //   AurogonImmobulusMode.restorePolicyManager(): Domestic- or InternationalPolicyManager
+    // On a CN ROM used abroad the domestic policy applies (dumpsys greezer: mCurrentCNPolicy: 1).
+    // With the option on, the flag is forced to "not CN" before Greeze initialises, so every
+    // isCnModel() branch takes the path a global ROM takes. No behaviour is re-implemented here.
+    // ---------------------------------------------------------------------------------------------
+
+    private static final String POLICY_CONFIG = "com.miui.server.greeze.PolicyManagerConfig";
+    private static volatile boolean forceGlobalPolicy;
+    private static volatile Method setCnModelMethod;
+
+    private void hookGreezeRegion() {
+        Class<?> policyConfig = XposedHelpers.findClass(POLICY_CONFIG, classLoader);
+        Method setCnModel = XposedHelpers.findMethodExact(policyConfig, "setCnModel", boolean.class);
+        setCnModelMethod = setCnModel;
+        XposedBridge.hookMethod(setCnModel, new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) {
+                if (forceGlobalPolicy) param.args[0] = false;
+            }
+        });
+        // The switch is read before the user unlocks, so it comes from the framework-side preferences.
+        boolean enabled = false;
+        try {
+            android.content.SharedPreferences prefs = XposedBridge.getRemotePreferences("config");
+            enabled = prefs != null && prefs.getBoolean(ConfigSchema.KEY_GREEZE_GLOBAL_POLICY, false);
+        } catch (Throwable error) {
+            printLog("Greeze global policy: early config unavailable (" + error + "), applied after unlock if enabled");
+        }
+        if (enabled) {
+            forceGlobalPolicy = true;
+            try {
+                setCnModel.invoke(null, false);
+                printLog("Greeze global policy: forced before Greeze init");
+            } catch (Throwable error) {
+                printLog("Greeze global policy: early set failed: " + error);
+            }
+        }
+    }
+
+    /**
+     * Fallback when the early read was not possible: switch the running service the same way its
+     * own SIM-change path does (thawAll + restorePolicyManager). Turning the option off again
+     * takes effect at the next reboot.
+     */
+    private static void applyGlobalPolicyLate(boolean enabled) {
+        Method setCnModel = setCnModelMethod;
+        if (!enabled || forceGlobalPolicy || setCnModel == null || greezeClass == null) return;
+        forceGlobalPolicy = true;
+        try {
+            setCnModel.invoke(null, false);
+            Object service = XposedHelpers.callStaticMethod(greezeClass, "getService");
+            if (service == null) return;
+            XposedHelpers.callMethod(service, "thawAll", "fcmfix_global_policy");
+            Object immobulus = XposedHelpers.getObjectField(service, "mImmobulusMode");
+            if (immobulus != null) XposedHelpers.callMethod(immobulus, "restorePolicyManager");
+            printLog("Greeze global policy: applied after unlock (full effect after a reboot)");
+        } catch (Throwable error) {
+            printLog("Greeze global policy: late apply failed: " + error);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
     // HyperOS sleep mode switch
     // PowerKeeper's PhoneSleepModeController turns mobile data, Wi-Fi and Bluetooth off when it
     // decides the user is asleep (seen on device: data off 00:42 -> 06:45, no FCM at all meanwhile).
@@ -321,6 +390,7 @@ public class HyperOsFix extends XposedModule {
     protected void onConfigLoaded(io.github.zopulus.ffc.util.ConfigSnapshot previous,
                                   io.github.zopulus.ffc.util.ConfigSnapshot current) {
         if (greezeClass == null || current == null) return;
+        applyGlobalPolicyLate(current.options.getOrDefault(ConfigSchema.KEY_GREEZE_GLOBAL_POLICY, false));
         boolean wanted = current.options.getOrDefault(ConfigSchema.KEY_HYPEROS_SLEEP_MODE, true);
         Boolean before = previous == null ? null : previous.options.get(ConfigSchema.KEY_HYPEROS_SLEEP_MODE);
         // Only act on the user's choice: "off" whenever it is off (idempotent, also after boot);
