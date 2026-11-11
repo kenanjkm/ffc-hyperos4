@@ -1,5 +1,10 @@
 # 更新记录
 
+## 2026111201-hyperos4（104）
+
+- Ayarlar: "HyperOS uyku modu" anahtarı kaldırıldı (uyku modu sistemde açık kalır); "Uyku modunda mobil veriyi açık tut" artık tek başına.
+- Kritik uygulama koruması: seçim listesi yalnızca FCM uygulamalarını değil, başlatıcıda görünen tüm uygulamaları gösteriyor; arama eklendi.
+
 ## 2026111104-hyperos4（103）
 
 - **Greeze: global ROM politikası (HyperOS, isteğe bağlı, deneysel):** Ayarlar → Dondurucu (Greeze). Greeze, Çin ve uluslararası politikayı aynı jar içinde taşıyor ve tek bir bayrakla (`PolicyManagerConfig.isCnModel`) seçiyor; Çin ROM'u yurt dışında kullanılırken Çin politikası geçerli (`mCurrentCNPolicy: 1`). Seçenek açıkken bayrak Greeze başlamadan önce "CN değil" yapılır; böylece tüm dallar global ROM'daki yolu izler. Yeniden başlatma gerekir.

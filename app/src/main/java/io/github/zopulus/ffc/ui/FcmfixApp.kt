@@ -108,6 +108,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import androidx.core.graphics.drawable.toBitmap
 import io.github.zopulus.ffc.FcmfixConfig
 import io.github.zopulus.ffc.FcmfixUiState
 import io.github.zopulus.ffc.HookReport
@@ -836,8 +837,6 @@ private fun SettingsScreen(
 
     if (showProtectedApps) {
         ProtectedAppsDialog(
-            // Only apps already allowed for FCM can be protected; keep currently protected ones listed too.
-            apps = apps.filter { it.packageName in config.allowedPackages || it.packageName in config.protectedApps },
             selected = config.protectedApps,
             onConfirm = { chosen ->
                 showProtectedApps = false
@@ -983,20 +982,10 @@ private fun SettingsScreen(
                 title = stringResource(R.string.night_group),
                 items = listOf(
                     SettingEntry(
-                        icon = ImageVector.vectorResource(R.drawable.ic_bedtime),
-                        title = stringResource(R.string.sleep_mode_title),
-                        summary = stringResource(if (config.hyperOsSleepMode) R.string.sleep_mode_summary_on
-                            else R.string.sleep_mode_summary_off),
-                        checked = config.hyperOsSleepMode,
-                        onCheckedChange = { onConfigChange(config.copy(hyperOsSleepMode = it)) }
-                    ),
-                    SettingEntry(
                         icon = ImageVector.vectorResource(R.drawable.ic_notifications_active),
                         title = stringResource(R.string.sleep_keep_data_title),
-                        summary = stringResource(if (config.hyperOsSleepMode) R.string.sleep_keep_data_summary
-                            else R.string.sleep_keep_data_summary_disabled),
-                        checked = config.hyperOsSleepMode && config.sleepModeKeepMobileData,
-                        enabled = config.hyperOsSleepMode,
+                        summary = stringResource(R.string.sleep_keep_data_summary),
+                        checked = config.sleepModeKeepMobileData,
                         onCheckedChange = { onConfigChange(config.copy(sleepModeKeepMobileData = it)) }
                     )
                 )
@@ -1116,12 +1105,22 @@ private fun SettingRow(item: SettingEntry, index: Int, count: Int, modifier: Mod
 /** Pick apps that HyperOS must neither freeze nor kill in the background. Costs battery; opt-in per app. */
 @Composable
 private fun ProtectedAppsDialog(
-    apps: List<InstalledApp>,
     selected: Set<String>,
     onConfirm: (Set<String>) -> Unit,
     onDismiss: () -> Unit
 ) {
     var chosen by remember(selected) { mutableStateOf(selected) }
+    // Every app with a launcher icon, not only FCM apps: apps with their own push channel
+    // (Instagram, Firefox downloads, ...) are exactly the ones that may need protection.
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var loaded by remember { mutableStateOf<List<InstalledApp>?>(null) }
+    var query by remember { mutableStateOf("") }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        loaded = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { loadLaunchableApps(context, selected) }
+    }
+    val apps = loaded.orEmpty().filter {
+        query.isBlank() || it.label.contains(query, ignoreCase = true) || it.packageName.contains(query, ignoreCase = true)
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Outlined.Warning, contentDescription = null) },
@@ -1129,7 +1128,18 @@ private fun ProtectedAppsDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.protected_warning), style = MaterialTheme.typography.bodyMedium)
-                if (apps.isEmpty()) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    placeholder = { Text(stringResource(R.string.search_hint)) }
+                )
+                if (loaded == null) {
+                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                } else if (apps.isEmpty()) {
                     Text(stringResource(R.string.protected_empty), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
@@ -1164,3 +1174,27 @@ private fun ProtectedAppsDialog(
 
 /** HyperOS (Xiaomi) build: ColorOS-only options are hidden and labels describe the HyperOS behaviour. */
 internal fun isHyperOs(): Boolean = io.github.zopulus.ffc.util.RomInfo.isHyperOs()
+
+
+/** Launchable apps (not this module), protected ones first, then by label. Runs off the main thread. */
+private fun loadLaunchableApps(context: android.content.Context, selected: Set<String>): List<InstalledApp> {
+    val pm = context.packageManager
+    val launcher = android.content.Intent(android.content.Intent.ACTION_MAIN)
+        .addCategory(android.content.Intent.CATEGORY_LAUNCHER)
+    val collator = java.text.Collator.getInstance(java.util.Locale.getDefault())
+    val size = (40 * context.resources.displayMetrics.density).toInt().coerceAtLeast(1)
+    return pm.queryIntentActivities(launcher, 0)
+        .mapNotNull { it.activityInfo?.applicationInfo }
+        .distinctBy { it.packageName }
+        .filter { it.packageName != context.packageName }
+        .mapNotNull { info ->
+            runCatching {
+                InstalledApp(
+                    packageName = info.packageName,
+                    label = info.loadLabel(pm).toString(),
+                    icon = info.loadIcon(pm).toBitmap(size, size)
+                )
+            }.getOrNull()
+        }
+        .sortedWith(compareBy<InstalledApp> { it.packageName !in selected }.thenComparator { a, b -> collator.compare(a.label, b.label) })
+}
