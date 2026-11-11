@@ -13,6 +13,8 @@ public final class ConfigSchema {
     public static final String KEY_AUTO_ALLOW_NEW_APPS = "autoAllowNewApps";
     /** HyperOS PowerKeeper "sleep mode" (turns data/Wi-Fi/Bluetooth off at night). true = leave it on (system default). */
     public static final String KEY_HYPEROS_SLEEP_MODE = "hyperOsSleepMode";
+    /** HyperOS: keep mobile data on while PowerKeeper sleep mode is active (rest of sleep mode unchanged). */
+    public static final String KEY_SLEEP_MODE_KEEP_DATA = "sleepModeKeepMobileData";
     public static final String KEY_INSTALL_EVENTS = "installEvents";
     /** HyperOS: packages the user chose to keep out of the freezer and the memory killer (costs battery). */
     public static final String KEY_PROTECTED_APPS = "protectedApps";
@@ -21,7 +23,7 @@ public final class ConfigSchema {
     public static final List<String> OPTIONS = List.of(KEY_DISABLE_AUTO_CLEAN_NOTIFICATION,
             KEY_INCLUDE_ICEBOX_DISABLED_APP, KEY_DEEP_SLEEP_GOOGLE_WHITELIST,
             KEY_DOZE_GOOGLE_WHITELIST, KEY_ROOT_DEEP_SLEEP_NETWORK_WHITELIST,
-            KEY_AUTO_ALLOW_NEW_APPS, KEY_HYPEROS_SLEEP_MODE);
+            KEY_AUTO_ALLOW_NEW_APPS, KEY_HYPEROS_SLEEP_MODE, KEY_SLEEP_MODE_KEEP_DATA);
     public static boolean defaultValue(String key) {
         return KEY_DEEP_SLEEP_GOOGLE_WHITELIST.equals(key) || KEY_DOZE_GOOGLE_WHITELIST.equals(key)
                 || KEY_AUTO_ALLOW_NEW_APPS.equals(key) || KEY_HYPEROS_SLEEP_MODE.equals(key);

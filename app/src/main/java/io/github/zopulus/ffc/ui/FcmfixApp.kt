@@ -974,6 +974,15 @@ private fun SettingsScreen(
                             else R.string.sleep_mode_summary_off),
                         checked = config.hyperOsSleepMode,
                         onCheckedChange = { onConfigChange(config.copy(hyperOsSleepMode = it)) }
+                    ),
+                    SettingEntry(
+                        icon = ImageVector.vectorResource(R.drawable.ic_notifications_active),
+                        title = stringResource(R.string.sleep_keep_data_title),
+                        summary = stringResource(if (config.hyperOsSleepMode) R.string.sleep_keep_data_summary
+                            else R.string.sleep_keep_data_summary_disabled),
+                        checked = config.hyperOsSleepMode && config.sleepModeKeepMobileData,
+                        enabled = config.hyperOsSleepMode,
+                        onCheckedChange = { onConfigChange(config.copy(sleepModeKeepMobileData = it)) }
                     )
                 )
             )
